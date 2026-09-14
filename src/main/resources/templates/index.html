@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Hệ Thống Đặt Vé Xe Khách Trực Tuyến</title>
+</head>
+<body>
+    <div th:fragment="content">
+        <!-- Hero Banner with Scenic Travel Background -->
+        <section class="hero-section text-center">
+            <div class="container py-4 position-relative" style="z-index: 2;">
+                <div class="d-inline-flex align-items-center gap-2 bg-white bg-opacity-25 backdrop-blur px-3 py-1 rounded-pill mb-3 text-white small fw-bold shadow-sm">
+                    <i class="bi bi-geo-alt-fill text-warning"></i> Khám phá Việt Nam trên những chuyến xe chất lượng cao
+                </div>
+                <h1 class="display-4 fw-bold mb-3 text-white text-shadow">VÉ XE KHÁCH CHẤT LƯỢNG CAO</h1>
+                <p class="lead mb-4 text-white text-opacity-90 fs-5 mx-auto text-shadow-sm" style="max-width: 650px;">
+                    Đặt vé trực tuyến nhanh chóng, chọn chỗ ngồi yêu thích, an tâm đồng hành trên mọi nẻo đường đất nước
+                </p>
+            </div>
+        </section>
+
+        <!-- Search Form Card (Bus Seat Booking Search Widget) -->
+        <div class="container">
+            <div class="search-card">
+                <form th:action="@{/chuyen-xe/tim-kiem}" method="get" class="row g-3 align-items-end">
+                    <div class="col-lg-3 col-md-6">
+                        <label for="diemDi" class="form-label fw-bold text-dark small">
+                            <i class="bi bi-geo-alt-fill text-danger me-1"></i>Điểm khởi hành
+                        </label>
+                        <div class="input-group search-input-group">
+                            <span class="input-group-text border-0 bg-transparent text-primary"><i class="bi bi-geo-alt"></i></span>
+                            <input type="text" class="form-control border-0 bg-transparent" id="diemDi" name="diemDi"
+                                   placeholder="VD: TP. Hồ Chí Minh" th:value="${param.diemDi}">
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <label for="diemDen" class="form-label fw-bold text-dark small">
+                            <i class="bi bi-flag-fill text-success me-1"></i>Điểm đến du lịch
+                        </label>
+                        <div class="input-group search-input-group">
+                            <span class="input-group-text border-0 bg-transparent text-success"><i class="bi bi-flag"></i></span>
+                            <input type="text" class="form-control border-0 bg-transparent" id="diemDen" name="diemDen"
+                                   placeholder="VD: Đà Lạt, Nha Trang..." th:value="${param.diemDen}">
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <label for="ngay" class="form-label fw-bold text-dark small">
+                            <i class="bi bi-calendar-event me-1 text-primary"></i>Ngày khởi hành
+                        </label>
+                        <div class="input-group search-input-group">
+                            <span class="input-group-text border-0 bg-transparent text-primary"><i class="bi bi-calendar"></i></span>
+                            <input type="date" class="form-control border-0 bg-transparent" id="ngay" name="ngay"
+                                   th:value="${param.ngay}">
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm rounded-3 py-2">
+                            <i class="bi bi-search me-2"></i>TÌM CHUYẾN XE
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tuyến đường phổ biến có hình ảnh điểm đến -->
+        <div class="container my-5 py-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold mb-1"><i class="bi bi-compass-fill text-primary me-2"></i>Tuyến đường phổ biến</h3>
+                    <p class="text-muted mb-0">Các hành trình du lịch được hành khách lựa chọn nhiều nhất</p>
+                </div>
+                <a th:href="@{/chuyen-xe/tim-kiem}" class="btn btn-outline-primary">Xem tất cả chuyến xe <i class="bi bi-arrow-right"></i></a>
+            </div>
+
+            <div class="row g-4">
+                <!-- Tuyến 1: Đà Lạt -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden destination-card">
+                        <div class="destination-img-box">
+                            <img th:src="@{/images/destinations/da-lat.jpg}" alt="Đà Lạt" class="destination-img"
+                                 onerror="this.onerror=null; this.src='/images/destinations/default.jpg';">
+                            <span class="destination-badge-float">
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>Đà Lạt (Lâm Đồng)
+                            </span>
+                        </div>
+                        <div class="card-body p-4 d-flex flex-column justify-content-between">
+                            <div>
+                                <span class="badge bg-primary-subtle text-primary mb-2">305 km • 7 giờ</span>
+                                <h5 class="card-title fw-bold">Sài Gòn - Đà Lạt</h5>
+                                <p class="card-text text-muted small">Khởi hành liên tục từ 08:00 đến 23:00 hàng ngày, xe giường nằm cao cấp</p>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                                <span class="fw-bold text-danger fs-5">Từ 280.000đ</span>
+                                <a th:href="@{/chuyen-xe/tim-kiem(diemDi='Hồ Chí Minh', diemDen='Đà Lạt')}" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">
+                                    <i class="bi bi-ticket-detailed me-1"></i> Chọn vé
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tuyến 2: Nha Trang -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden destination-card">
+                        <div class="destination-img-box">
+                            <img th:src="@{/images/destinations/nha-trang.jpg}" alt="Nha Trang" class="destination-img"
+                                 onerror="this.onerror=null; this.src='/images/destinations/default.jpg';">
+                            <span class="destination-badge-float">
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>Nha Trang (Khánh Hòa)
+                            </span>
+                        </div>
+                        <div class="card-body p-4 d-flex flex-column justify-content-between">
+                            <div>
+                                <span class="badge bg-success-subtle text-success mb-2">435 km • 8 giờ</span>
+                                <h5 class="card-title fw-bold">Sài Gòn - Nha Trang</h5>
+                                <p class="card-text text-muted small">Xe Limousine VIP 22 phòng cao cấp, cung đường ven biển tuyệt đẹp</p>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                                <span class="fw-bold text-danger fs-5">Từ 350.000đ</span>
+                                <a th:href="@{/chuyen-xe/tim-kiem(diemDi='Hồ Chí Minh', diemDen='Nha Trang')}" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">
+                                    <i class="bi bi-ticket-detailed me-1"></i> Chọn vé
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tuyến 3: Sapa -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden destination-card">
+                        <div class="destination-img-box">
+                            <img th:src="@{/images/destinations/sapa.jpg}" alt="Sapa" class="destination-img"
+                                 onerror="this.onerror=null; this.src='/images/destinations/default.jpg';">
+                            <span class="destination-badge-float">
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>Sapa (Lào Cai)
+                            </span>
+                        </div>
+                        <div class="card-body p-4 d-flex flex-column justify-content-between">
+                            <div>
+                                <span class="badge bg-warning-subtle text-warning mb-2">315 km • 6 giờ</span>
+                                <h5 class="card-title fw-bold">Hà Nội - Sapa</h5>
+                                <p class="card-text text-muted small">Xe cabin đôi / đơn đón trả tận trung tâm thị xã, ngắm Fansipan hùng vĩ</p>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                                <span class="fw-bold text-danger fs-5">Từ 320.000đ</span>
+                                <a th:href="@{/chuyen-xe/tim-kiem(diemDi='Hà Nội', diemDen='Sapa')}" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">
+                                    <i class="bi bi-ticket-detailed me-1"></i> Chọn vé
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tuyến 4: Đà Nẵng - Huế -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden destination-card">
+                        <div class="destination-img-box">
+                            <img th:src="@{/images/destinations/hue.jpg}" alt="Huế" class="destination-img"
+                                 onerror="this.onerror=null; this.src='/images/destinations/default.jpg';">
+                            <span class="destination-badge-float">
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>Cố Đô Huế
+                            </span>
+                        </div>
+                        <div class="card-body p-4 d-flex flex-column justify-content-between">
+                            <div>
+                                <span class="badge bg-info-subtle text-info mb-2">100 km • 2 giờ</span>
+                                <h5 class="card-title fw-bold">Đà Nẵng - Huế</h5>
+                                <p class="card-text text-muted small">Chạy cao tốc La Sơn - Túy Loan êm ái, khám phá Đại Nội cổ kính</p>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                                <span class="fw-bold text-danger fs-5">Từ 110.000đ</span>
+                                <a th:href="@{/chuyen-xe/tim-kiem(diemDi='Đà Nẵng', diemDen='Huế')}" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">
+                                    <i class="bi bi-ticket-detailed me-1"></i> Chọn vé
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chuyến đi nổi bật khởi hành sớm nhất -->
+        <div class="container my-5" th:if="${danhSachChuyenTieuBieu != null and !#lists.isEmpty(danhSachChuyenTieuBieu)}">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold mb-1"><i class="bi bi-stars text-warning me-2"></i>Chuyến Đi Đang Mở Bán</h3>
+                    <p class="text-muted mb-0">Lựa chọn chuyến đi hôm nay, chọn ghế ngồi trực tuyến</p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6" th:each="c : ${danhSachChuyenTieuBieu}">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden destination-card">
+                        <div class="destination-img-box">
+                            <img th:src="${c.hinhAnhHienThi}"
+                                 th:alt="${c.tuyenXe.diemDen}"
+                                 class="destination-img"
+                                 onerror="this.onerror=null; this.src='/images/destinations/default.jpg';">
+                            <span class="destination-badge-float">
+                                <i class="bi bi-geo-alt-fill text-danger me-1"></i><span th:text="${c.tuyenXe.diemDen}">Điểm đến</span>
+                            </span>
+                            <span class="badge destination-seats-badge"
+                                  th:classappend="${c.soGheTrong != null and c.soGheTrong > 0 ? 'bg-success' : 'bg-danger'}">
+                                <span th:text="${c.soGheTrong != null and c.soGheTrong > 0 ? ('Còn ' + c.soGheTrong + ' chỗ') : 'Hết chỗ'}">Còn 20 chỗ</span>
+                            </span>
+                        </div>
+                        <div class="card-body p-3 d-flex flex-column justify-content-between">
+                            <div>
+                                <h6 class="fw-bold text-dark mb-1" th:text="${c.tuyenXe.tenTuyen}">Sài Gòn - Đà Lạt</h6>
+                                <div class="small text-muted mb-2">
+                                    <i class="bi bi-clock me-1 text-primary"></i><span th:text="${c.gioKhoiHanh}">08:00</span> • <span th:text="${#temporals.format(c.ngayKhoiHanh, 'dd/MM/yyyy')}">01/11/2026</span>
+                                </div>
+                                <div class="small text-muted mb-2">
+                                    <span class="badge bg-light text-dark" th:text="${c.xe.loaiXe}">Giường nằm</span>
+                                    <span class="badge bg-secondary-subtle text-secondary" th:text="${c.tuyenXe.thoiGianDuKien}">7 giờ</span>
+                                </div>
+                            </div>
+                            <div class="pt-2 border-top mt-2">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="small text-muted">Giá vé:</span>
+                                    <strong class="text-danger fs-6" th:text="${#numbers.formatDecimal(c.giaVe, 0, 'COMMA', 0, 'POINT') + 'đ'}">280.000đ</strong>
+                                </div>
+                                <div class="d-grid gap-1">
+                                    <a th:href="@{/chuyen-xe/chi-tiet/{id}(id=${c.id})}" class="btn btn-outline-primary btn-sm rounded-pill fw-semibold">
+                                        <i class="bi bi-info-circle me-1"></i> Chi tiết
+                                    </a>
+                                    <a th:href="@{/chuyen-xe/chon-ghe/{id}(id=${c.id})}"
+                                       class="btn btn-primary btn-sm rounded-pill fw-bold shadow-sm"
+                                       th:classappend="${c.soGheTrong != null and c.soGheTrong == 0 ? 'disabled' : ''}">
+                                        <i class="bi bi-ticket-perforated me-1"></i> Chọn Chuyến & Ghế <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cam kết chất lượng -->
+        <div class="bg-light py-5">
+            <div class="container">
+                <h3 class="text-center fw-bold mb-4">Tại sao nên chọn chúng tôi?</h3>
+                <div class="row g-4">
+                    <div class="col-md-3 text-center">
+                        <div class="p-3">
+                            <i class="bi bi-shield-check text-primary fs-1 mb-2"></i>
+                            <h5 class="fw-bold">Chắc chắn có chỗ</h5>
+                            <p class="text-muted small">Công nghệ khóa ghế đồng thời đảm bảo không bao giờ trùng vé của bạn.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="p-3">
+                            <i class="bi bi-cash-coin text-success fs-1 mb-2"></i>
+                            <h5 class="fw-bold">Giá vé minh bạch</h5>
+                            <p class="text-muted small">Không thu phụ phí ẩn, giá niêm yết rõ ràng chuẩn từng tuyến.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="p-3">
+                            <i class="bi bi-qr-code-scan text-warning fs-1 mb-2"></i>
+                            <h5 class="fw-bold">Soát vé tự động</h5>
+                            <p class="text-muted small">Ứng dụng mạng Client tra cứu mã vé tức thì tại cửa lên xe.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="p-3">
+                            <i class="bi bi-headset text-danger fs-1 mb-2"></i>
+                            <h5 class="fw-bold">Hỗ trợ 24/7</h5>
+                            <p class="text-muted small">Đội ngũ tổng đài luôn sẵn sàng hỗ trợ khách hàng suốt hành trình.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
