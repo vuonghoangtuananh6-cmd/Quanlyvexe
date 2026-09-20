@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Đăng nhập - Quản Lý Vé Xe Khách</title>
+</head>
+<body>
+    <div th:fragment="content" class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card border-0 shadow-lg rounded-4 p-4">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-person-circle text-primary fs-1"></i>
+                        <h3 class="fw-bold mt-2">Đăng Nhập</h3>
+                        <p class="text-muted small">Đăng nhập tài khoản để đặt vé và quản lý lịch trình</p>
+                    </div>
+
+                    <div th:if="${redirect != null and !redirect.isEmpty()}" class="alert alert-warning py-2 small mb-3">
+                        <i class="bi bi-shield-lock-fill me-1"></i> Quý khách vui lòng đăng nhập tài khoản để thực hiện đặt vé và giữ chỗ xe.
+                    </div>
+
+                    <form th:action="@{/dang-nhap}" method="post">
+                        <input type="hidden" name="redirect" th:value="${redirect}" th:if="${redirect != null and !redirect.isEmpty()}">
+
+                        <div class="mb-3">
+                            <label for="taiKhoan" class="form-label fw-semibold">Tên tài khoản</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input type="text" class="form-control" id="taiKhoan" name="taiKhoan" required placeholder="Nhập tài khoản" value="khach01">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="matKhau" class="form-label fw-semibold">Mật khẩu</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-key"></i></span>
+                                <input type="password" class="form-control" id="matKhau" name="matKhau" required placeholder="Nhập mật khẩu" value="123456">
+                            </div>
+                        </div>
+
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold">
+                                <i class="bi bi-box-arrow-in-right me-1"></i> Đăng Nhập
+                            </button>
+                        </div>
+
+                        <!-- Gợi ý tài khoản nhanh để trải nghiệm -->
+                        <div class="p-2 bg-light rounded-3 small mb-3 text-muted text-center">
+                            <div class="fw-semibold mb-1 text-dark">Tài khoản demo kiểm thử:</div>
+                            <span class="badge bg-secondary-subtle text-secondary me-1">Khách hàng: khach01 / 123456</span>
+                            <span class="badge bg-primary-subtle text-primary">Admin: admin / 123456</span>
+                        </div>
+
+                        <div class="text-center">
+                            <span class="text-muted small">Chưa có tài khoản?</span>
+                            <a th:href="@{/dang-ky}" class="text-decoration-none fw-semibold">Đăng ký ngay</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
