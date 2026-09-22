@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: layout(~{::title}, ~{::content})}">
+<head>
+    <title th:text="${pageTitle}">Thông tin Tuyến xe</title>
+</head>
+<body>
+    <div th:fragment="content" class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card border-0 shadow-lg rounded-4 p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold mb-0 text-primary">
+                            <i class="bi bi-geo-alt-fill me-2"></i><span th:text="${pageTitle}">Thêm Tuyến Xe</span>
+                        </h4>
+                        <a th:href="@{/admin/tuyen-xe}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrow-left me-1"></i>Quay lại danh sách
+                        </a>
+                    </div>
+
+                    <form th:action="@{/admin/tuyen-xe/luu}" th:object="${tuyenXe}" method="post">
+                        <input type="hidden" th:field="*{id}" />
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label for="maTuyen" class="form-label fw-semibold">Mã tuyến <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="maTuyen" th:field="*{maTuyen}" required placeholder="VD: TX21"
+                                       th:readonly="${tuyenXe.id != null}">
+                            </div>
+                            <div class="col-md-8">
+                                <label for="tenTuyen" class="form-label fw-semibold">Tên tuyến <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="tenTuyen" th:field="*{tenTuyen}" required placeholder="VD: Sài Gòn - Phan Rang">
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="diemDi" class="form-label fw-semibold">Điểm đi <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="diemDi" th:field="*{diemDi}" required placeholder="Tỉnh/Thành phố xuất phát">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="diemDen" class="form-label fw-semibold">Điểm đến <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="diemDen" th:field="*{diemDen}" required placeholder="Tỉnh/Thành phố đích đến">
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="quangDuongKm" class="form-label fw-semibold">Quãng đường (km) <span class="text-danger">*</span></label>
+                                <input type="number" step="0.1" class="form-control" id="quangDuongKm" th:field="*{quangDuongKm}" required placeholder="VD: 350">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="thoiGianDuKien" class="form-label fw-semibold">Thời gian dự kiến <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="thoiGianDuKien" th:field="*{thoiGianDuKien}" required placeholder="VD: 7 giờ 30 phút">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="hinhAnh" class="form-label fw-semibold">URL Hình ảnh điểm đến (Tùy chọn)</label>
+                            <input type="text" class="form-control" id="hinhAnh" th:field="*{hinhAnh}"
+                                   placeholder="VD: /images/destinations/da-lat.jpg hoặc URL ảnh trực tuyến">
+                            <div class="form-text small text-muted">Nếu để trống, hệ thống sẽ tự động hiển thị ảnh phong cảnh danh lam thắng cảnh đặc trưng của điểm đến.</div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a th:href="@{/admin/tuyen-xe}" class="btn btn-secondary px-4">Hủy bỏ</a>
+                            <button type="submit" class="btn btn-primary px-4 fw-bold">
+                                <i class="bi bi-save me-1"></i> Lưu thông tin
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
