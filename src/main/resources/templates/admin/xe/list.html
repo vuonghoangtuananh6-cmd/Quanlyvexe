@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Quản lý Xe Khách - Admin</title>
+</head>
+<body>
+    <div th:fragment="content" class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1"><i class="bi bi-truck-front-fill text-primary me-2"></i>Danh Sách Xe Khách</h3>
+                <p class="text-muted mb-0">Quản lý đội xe và cấu hình ghế ngồi tự động</p>
+            </div>
+            <a th:href="@{/admin/xe/them-moi}" class="btn btn-primary fw-semibold shadow-sm">
+                <i class="bi bi-plus-circle me-1"></i> Thêm Xe Mới
+            </a>
+        </div>
+
+        <!-- Tìm kiếm -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-3">
+                <form th:action="@{/admin/xe}" method="get" class="row g-2 align-items-center">
+                    <div class="col-md-9">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control" name="keyword" th:value="${keyword}"
+                                   placeholder="Tìm kiếm theo biển số xe hoặc tên xe...">
+                        </div>
+                    </div>
+                    <div class="col-md-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary w-100 fw-semibold">Tìm kiếm</button>
+                        <a th:href="@{/admin/xe}" class="btn btn-outline-secondary">Đặt lại</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Bảng danh sách xe -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>
+                                <a th:href="@{/admin/xe(page=${currentPage}, keyword=${keyword}, sortField='bienSo', sortDir=${sortField == 'bienSo' ? reverseSortDir : 'asc'})}" class="text-decoration-none text-dark">
+                                    Biển số <i class="bi bi-arrow-down-up small"></i>
+                                </a>
+                            </th>
+                            <th>
+                                <a th:href="@{/admin/xe(page=${currentPage}, keyword=${keyword}, sortField='tenXe', sortDir=${sortField == 'tenXe' ? reverseSortDir : 'asc'})}" class="text-decoration-none text-dark">
+                                    Tên xe <i class="bi bi-arrow-down-up small"></i>
+                                </a>
+                            </th>
+                            <th>
+                                <a th:href="@{/admin/xe(page=${currentPage}, keyword=${keyword}, sortField='loaiXe', sortDir=${sortField == 'loaiXe' ? reverseSortDir : 'asc'})}" class="text-decoration-none text-dark">
+                                    Loại xe <i class="bi bi-arrow-down-up small"></i>
+                                </a>
+                            </th>
+                            <th>
+                                <a th:href="@{/admin/xe(page=${currentPage}, keyword=${keyword}, sortField='tongSoGhe', sortDir=${sortField == 'tongSoGhe' ? reverseSortDir : 'asc'})}" class="text-decoration-none text-dark">
+                                    Tổng số ghế <i class="bi bi-arrow-down-up small"></i>
+                                </a>
+                            </th>
+                            <th>Trạng thái</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(listXe)}">
+                            <td colspan="6" class="text-center text-muted py-4">Không tìm thấy thông tin xe nào.</td>
+                        </tr>
+                        <tr th:each="x : ${listXe}">
+                            <td><span class="badge bg-dark fs-6" th:text="${x.bienSo}">51B-123.45</span></td>
+                            <td class="fw-semibold" th:text="${x.tenXe}">Thaco Mobihome</td>
+                            <td>
+                                <span class="badge" th:classappend="${x.loaiXe == 'Limousine' ? 'bg-warning text-dark' : (x.loaiXe == 'Giường nằm' ? 'bg-primary' : 'bg-info')}"
+                                      th:text="${x.loaiXe}">Giường nằm</span>
+                            </td>
+                            <td><strong th:text="${x.tongSoGhe}">34</strong> chỗ</td>
+                            <td>
+                                <span class="badge bg-success-subtle text-success" th:text="${x.trangThai}">Hoạt động</span>
+                            </td>
+                            <td class="text-center">
+                                <a th:href="@{/admin/xe/ghe/{id}(id=${x.id})}" class="btn btn-sm btn-outline-info me-1" title="Xem sơ đồ ghế">
+                                    <i class="bi bi-grid-3x3-gap-fill"></i> Sơ đồ ghế
+                                </a>
+                                <a th:href="@{/admin/xe/chinh-sua/{id}(id=${x.id})}" class="btn btn-sm btn-outline-primary me-1" title="Chỉnh sửa">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" th:data-bs-target="'#deleteModal' + ${x.id}" title="Xóa">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+
+                                <!-- Modal Xác Nhận Xóa -->
+                                <div class="modal fade" th:id="'deleteModal' + ${x.id}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận xóa xe</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body text-start">
+                                                Bạn có chắc chắn muốn xóa xe biển số <strong th:text="${x.bienSo}"></strong>? Sơ đồ ghế liên quan cũng sẽ bị xóa.
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                                                <a th:href="@{/admin/xe/xoa/{id}(id=${x.id})}" class="btn btn-danger">Đồng ý Xóa</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Phân trang -->
+            <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3" th:if="${totalPages > 1}">
+                <span class="small text-muted">Hiển thị trang <strong th:text="${currentPage}"></strong> / <strong th:text="${totalPages}"></strong> (Tổng <strong th:text="${totalItems}"></strong> xe)</span>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/xe(page=${currentPage - 1}, keyword=${keyword}, sortField=${sortField}, sortDir=${sortDir})}">Trước</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}" th:classappend="${currentPage == i} ? 'active'">
+                            <a class="page-link" th:href="@{/admin/xe(page=${i}, keyword=${keyword}, sortField=${sortField}, sortDir=${sortDir})}" th:text="${i}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/xe(page=${currentPage + 1}, keyword=${keyword}, sortField=${sortField}, sortDir=${sortDir})}">Sau</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

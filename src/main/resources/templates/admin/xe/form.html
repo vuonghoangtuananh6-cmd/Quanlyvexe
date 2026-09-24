@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: layout(~{::title}, ~{::content})}">
+<head>
+    <title th:text="${pageTitle}">Thông tin Xe Khách</title>
+</head>
+<body>
+    <div th:fragment="content" class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-md-7">
+                <div class="card border-0 shadow-lg rounded-4 p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold mb-0 text-primary">
+                            <i class="bi bi-truck me-2"></i><span th:text="${pageTitle}">Thêm Xe Khách</span>
+                        </h4>
+                        <a th:href="@{/admin/xe}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrow-left me-1"></i>Quay lại
+                        </a>
+                    </div>
+
+                    <form th:action="@{/admin/xe/luu}" th:object="${xe}" method="post">
+                        <input type="hidden" th:field="*{id}" />
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="bienSo" class="form-label fw-semibold">Biển số xe <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="bienSo" th:field="*{bienSo}" required placeholder="VD: 51B-999.88"
+                                       th:readonly="${xe.id != null}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="tenXe" class="form-label fw-semibold">Tên định danh xe <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="tenXe" th:field="*{tenXe}" required placeholder="VD: Thaco Mobihome VIP 09">
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="loaiXe" class="form-label fw-semibold">Loại xe <span class="text-danger">*</span></label>
+                                <select class="form-select" id="loaiXe" th:field="*{loaiXe}" required>
+                                    <option value="Giường nằm">Giường nằm cao cấp</option>
+                                    <option value="Limousine">Limousine VIP</option>
+                                    <option value="Ghế ngồi">Ghế ngồi tiêu chuẩn</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="tongSoGhe" class="form-label fw-semibold">Tổng số ghế <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="tongSoGhe" th:field="*{tongSoGhe}" min="10" max="60" required
+                                       placeholder="VD: 34" th:readonly="${xe.id != null}">
+                                <div class="form-text" th:if="${xe.id == null}">Hệ thống sẽ tự động sinh sơ đồ ghế theo số lượng này.</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4" th:if="${xe.id != null}">
+                            <label for="trangThai" class="form-label fw-semibold">Trạng thái xe</label>
+                            <select class="form-select" id="trangThai" th:field="*{trangThai}">
+                                <option value="Hoạt động">Hoạt động</option>
+                                <option value="Bảo dưỡng">Đang bảo dưỡng</option>
+                                <option value="Ngừng chạy">Ngừng hoạt động</option>
+                            </select>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a th:href="@{/admin/xe}" class="btn btn-secondary px-4">Hủy bỏ</a>
+                            <button type="submit" class="btn btn-primary px-4 fw-bold">
+                                <i class="bi bi-save me-1"></i> Lưu xe
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

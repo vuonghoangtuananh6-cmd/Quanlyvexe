@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Sơ đồ ghế xe - Quản lý</title>
+</head>
+<body>
+    <div th:fragment="content" class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1">
+                    <i class="bi bi-grid-3x3-gap-fill text-primary me-2"></i>Sơ đồ ghế xe: 
+                    <span class="text-primary" th:text="${xe.bienSo}">51B-123.45</span>
+                </h3>
+                <p class="text-muted mb-0">Loại xe: <strong th:text="${xe.loaiXe}"></strong> • Tổng số: <strong th:text="${xe.tongSoGhe}"></strong> ghế</p>
+            </div>
+            <a th:href="@{/admin/xe}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Quay lại danh sách xe
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <h5 class="fw-bold mb-3 border-bottom pb-2">Danh sách các ghế được sinh tự động</h5>
+            
+            <div class="row g-4">
+                <!-- Tầng 1 -->
+                <div class="col-md-6 border-end">
+                    <div class="p-3 bg-light rounded-3 text-center">
+                        <h6 class="fw-bold text-primary mb-3"><i class="bi bi-layers me-1"></i>TẦNG 1 (Dãy A)</h6>
+                        <div class="d-flex flex-wrap justify-content-center gap-2">
+                            <div th:each="g : ${danhSachGhe}" th:if="${g.tang == 1}" class="bus-seat seat-empty shadow-sm">
+                                <span th:text="${g.soGhe}">A01</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tầng 2 -->
+                <div class="col-md-6">
+                    <div class="p-3 bg-light rounded-3 text-center">
+                        <h6 class="fw-bold text-success mb-3"><i class="bi bi-layers-fill me-1"></i>TẦNG 2 (Dãy B)</h6>
+                        <div class="d-flex flex-wrap justify-content-center gap-2">
+                            <div th:each="g : ${danhSachGhe}" th:if="${g.tang == 2}" class="bus-seat seat-empty shadow-sm">
+                                <span th:text="${g.soGhe}">B01</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
