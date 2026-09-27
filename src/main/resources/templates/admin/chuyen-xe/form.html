@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: layout(~{::title}, ~{::content})}">
+<head>
+    <title th:text="${pageTitle}">Lịch Trình Chuyến Xe</title>
+</head>
+<body>
+    <div th:fragment="content" class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card border-0 shadow-lg rounded-4 p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold mb-0 text-primary">
+                            <i class="bi bi-calendar-plus me-2"></i><span th:text="${pageTitle}">Lên Lịch Chuyến Xe</span>
+                        </h4>
+                        <a th:href="@{/admin/chuyen-xe}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrow-left me-1"></i>Quay lại danh sách
+                        </a>
+                    </div>
+
+                    <form th:action="@{/admin/chuyen-xe/luu}" th:object="${chuyenXe}" method="post">
+                        <input type="hidden" th:field="*{id}" />
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label for="maChuyen" class="form-label fw-semibold">Mã chuyến xe <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="maChuyen" th:field="*{maChuyen}" required placeholder="VD: CX21"
+                                       th:readonly="${chuyenXe.id != null}">
+                            </div>
+                            <div class="col-md-8">
+                                <label for="tuyenXe" class="form-label fw-semibold">Chọn tuyến đường <span class="text-danger">*</span></label>
+                                <select class="form-select" id="tuyenXe" th:field="*{tuyenXe.id}" required>
+                                    <option th:each="t : ${listTuyenXe}" th:value="${t.id}"
+                                            th:text="${t.maTuyen + ' - ' + t.tenTuyen + ' (' + t.thoiGianDuKien + ')'}"></option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="xe" class="form-label fw-semibold">Chọn xe phục vụ <span class="text-danger">*</span></label>
+                                <select class="form-select" id="xe" th:field="*{xe.id}" required>
+                                    <option th:each="x : ${listXe}" th:value="${x.id}"
+                                            th:text="${x.bienSo + ' - ' + x.tenXe + ' (' + x.loaiXe + ' - ' + x.tongSoGhe + ' ghế)'}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="giaVe" class="form-label fw-semibold">Giá vé (VNĐ) <span class="text-danger">*</span></label>
+                                <input type="number" step="1000" class="form-control" id="giaVe" th:field="*{giaVe}" required placeholder="VD: 280000">
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label for="ngayKhoiHanh" class="form-label fw-semibold">Ngày khởi hành <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="ngayKhoiHanh" th:field="*{ngayKhoiHanh}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="gioKhoiHanh" class="form-label fw-semibold">Giờ xuất bến <span class="text-danger">*</span></label>
+                                <input type="time" class="form-control" id="gioKhoiHanh" th:field="*{gioKhoiHanh}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="gioDenDuKien" class="form-label fw-semibold">Giờ đến dự kiến <span class="text-danger">*</span></label>
+                                <input type="time" class="form-control" id="gioDenDuKien" th:field="*{gioDenDuKien}" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="hinhAnh" class="form-label fw-semibold">URL Hình ảnh chuyến xe (Tùy chọn)</label>
+                            <input type="text" class="form-control" id="hinhAnh" th:field="*{hinhAnh}"
+                                   placeholder="VD: /images/destinations/da-lat.jpg hoặc URL ảnh trực tuyến">
+                            <div class="form-text small text-muted">Nếu để trống, hệ thống sẽ tự động kế thừa ảnh điểm đến từ tuyến đường đã chọn.</div>
+                        </div>
+
+                        <div class="mb-4" th:if="${chuyenXe.id != null}">
+                            <label for="trangThai" class="form-label fw-semibold">Trạng thái chuyến</label>
+                            <select class="form-select" id="trangThai" th:field="*{trangThai}">
+                                <option value="Sắp khởi hành">Sắp khởi hành</option>
+                                <option value="Đang chạy">Đang chạy</option>
+                                <option value="Đã hoàn thành">Đã hoàn thành</option>
+                                <option value="Đã hủy">Đã hủy</option>
+                            </select>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a th:href="@{/admin/chuyen-xe}" class="btn btn-secondary px-4">Hủy bỏ</a>
+                            <button type="submit" class="btn btn-primary px-4 fw-bold">
+                                <i class="bi bi-save me-1"></i> Lưu Lịch Trình
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
