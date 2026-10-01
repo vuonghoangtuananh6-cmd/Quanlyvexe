@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Tìm kiếm chuyến xe - Quản Lý Vé Xe Khách</title>
+</head>
+<body>
+    <div th:fragment="content" class="container py-4">
+        <!-- Form tìm kiếm nhanh trên cùng -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3 text-primary"><i class="bi bi-search me-2"></i>Tìm Chuyến Xe Khách</h5>
+                <form th:action="@{/chuyen-xe/tim-kiem}" method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-muted">Điểm xuất phát</label>
+                        <input type="text" class="form-control" name="diemDi" th:value="${diemDi}" placeholder="VD: TP. Hồ Chí Minh">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-muted">Điểm đến</label>
+                        <input type="text" class="form-control" name="diemDen" th:value="${diemDen}" placeholder="VD: Đà Lạt">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold text-muted">Ngày khởi hành</label>
+                        <input type="date" class="form-control" name="ngay" th:value="${ngay}">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100 fw-bold">Tìm Lại</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Kết quả tìm kiếm -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold mb-0">
+                Kết quả tìm kiếm: <span class="text-primary" th:text="${#lists.size(danhSachChuyen)}">0</span> chuyến phù hợp
+            </h4>
+        </div>
+
+        <div th:if="${#lists.isEmpty(danhSachChuyen)}" class="alert alert-warning text-center py-5 rounded-4 shadow-sm">
+            <i class="bi bi-info-circle fs-1 d-block mb-2 text-warning"></i>
+            <h5>Không tìm thấy chuyến xe nào phù hợp với yêu cầu tìm kiếm của bạn!</h5>
+            <p class="text-muted small mb-3">Hãy thử tìm với ngày khác hoặc để trống bộ lọc để xem toàn bộ các chuyến xe đang mở bán.</p>
+            <a th:href="@{/chuyen-xe/tim-kiem}" class="btn btn-outline-primary">Xem tất cả các chuyến</a>
+        </div>
+
+        <div class="row g-4" th:unless="${#lists.isEmpty(danhSachChuyen)}">
+            <div class="col-12" th:each="c : ${danhSachChuyen}">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden destination-card">
+                    <div class="row g-0 align-items-stretch">
+                        <!-- Cột 1: Ảnh đại diện điểm đến -->
+                        <div class="col-lg-3 col-md-4">
+                            <div class="destination-img-box h-100 position-relative" style="min-height: 180px;">
+                                <img th:src="${c.hinhAnhHienThi}"
+                                     th:alt="${c.tuyenXe.diemDen}"
+                                     class="destination-img"
+                                     onerror="this.onerror=null; this.src='/images/destinations/default.jpg';">
+                                <span class="destination-badge-float">
+                                    <i class="bi bi-geo-alt-fill text-danger me-1"></i><span th:text="${c.tuyenXe.diemDen}">Điểm đến</span>
+                                </span>
+                                <span class="badge destination-seats-badge"
+                                      th:classappend="${c.soGheTrong != null and c.soGheTrong > 0 ? 'bg-success' : 'bg-danger'}">
+                                    <i class="bi bi-person-check me-1"></i>
+                                    <span th:text="${c.soGheTrong != null and c.soGheTrong > 0 ? ('Còn ' + c.soGheTrong + ' chỗ') : 'Hết chỗ'}">Còn 20 chỗ</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Cột 2 & 3 & 4: Nội dung chi tiết chuyến xe -->
+                        <div class="col-lg-9 col-md-8 p-3 p-lg-4">
+                            <div class="row align-items-center h-100">
+                                <!-- Giờ & lộ trình -->
+                                <div class="col-lg-4 col-md-6 mb-3 mb-lg-0 border-end">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="fs-4 fw-bold text-primary" th:text="${c.gioKhoiHanh}">08:00</span>
+                                        <i class="bi bi-arrow-right mx-2 text-muted"></i>
+                                        <span class="fs-4 fw-bold text-secondary" th:text="${c.gioDenDuKien}">15:00</span>
+                                    </div>
+                                    <h5 class="fw-bold text-dark mb-1" th:text="${c.tuyenXe.tenTuyen}">Sài Gòn - Đà Lạt</h5>
+                                    <div class="small text-muted mb-1">
+                                        <i class="bi bi-geo-alt text-danger me-1"></i>Xuất phát: <span th:text="${c.tuyenXe.diemDi}">TP. Hồ Chí Minh</span>
+                                    </div>
+                                    <div class="small text-muted">
+                                        <i class="bi bi-flag-fill text-success me-1"></i>Điểm đến: <strong th:text="${c.tuyenXe.diemDen}">Đà Lạt</strong>
+                                    </div>
+                                </div>
+
+                                <!-- Xe & Ngày đi -->
+                                <div class="col-lg-4 col-md-6 mb-3 mb-lg-0 border-end">
+                                    <div class="mb-2">
+                                        <span class="badge" th:classappend="${c.xe.loaiXe == 'Limousine' ? 'bg-warning text-dark' : 'bg-primary'}"
+                                              th:text="${c.xe.loaiXe}">Giường nằm</span>
+                                        <span class="badge bg-light text-dark ms-1" th:text="${c.xe.tenXe}">Thaco Mobihome</span>
+                                    </div>
+                                    <div class="small text-muted mb-1">
+                                        <i class="bi bi-calendar-check text-primary me-1"></i>Ngày đi: <strong class="text-dark" th:text="${#temporals.format(c.ngayKhoiHanh, 'dd/MM/yyyy')}">01/11/2026</strong>
+                                    </div>
+                                    <div class="small text-muted mb-1">
+                                        <i class="bi bi-clock-history text-secondary me-1"></i>Thời gian: <span th:text="${c.tuyenXe.thoiGianDuKien}">7 giờ</span>
+                                    </div>
+                                    <div class="small text-muted">
+                                        <i class="bi bi-truck text-muted me-1"></i>Biển số: <span th:text="${c.xe.bienSo}">51B-123.45</span>
+                                    </div>
+                                </div>
+
+                                <!-- Giá vé & Nút đặt vé -->
+                                <div class="col-lg-4 col-md-12 text-lg-end mt-3 mt-lg-0">
+                                    <div class="small text-muted">Giá vé niêm yết 1 ghế</div>
+                                    <div class="fs-3 fw-bold text-danger mb-2"
+                                         th:text="${#numbers.formatDecimal(c.giaVe, 0, 'COMMA', 0, 'POINT') + 'đ'}">280,000đ</div>
+                                    <div class="d-flex justify-content-lg-end gap-2">
+                                        <a th:href="@{/chuyen-xe/chi-tiet/{id}(id=${c.id})}" class="btn btn-outline-primary btn-sm px-3 fw-semibold">
+                                            <i class="bi bi-info-circle me-1"></i> Chi tiết
+                                        </a>
+                                        <a th:href="@{/chuyen-xe/chon-ghe/{id}(id=${c.id})}"
+                                           class="btn btn-primary fw-bold shadow-sm px-3 rounded-pill"
+                                           th:classappend="${c.soGheTrong != null and c.soGheTrong == 0 ? 'disabled' : ''}">
+                                            <i class="bi bi-ticket-perforated me-1"></i> Chọn Ghế <i class="bi bi-arrow-right ms-1"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
