@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: layout(~{::title}, ~{::content})}">
+<head>
+    <title th:text="${'Chi tiết chuyến xe: ' + chuyenXe.tuyenXe.tenTuyen}">Chi Tiết Chuyến Đi</title>
+</head>
+<body>
+    <div th:fragment="content" class="container py-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/chuyen-xe/tim-kiem}" class="text-decoration-none">Tìm chuyến xe</a></li>
+                <li class="breadcrumb-item active" aria-current="page" th:text="${chuyenXe.tuyenXe.tenTuyen}">Chi tiết chuyến</li>
+            </ol>
+        </nav>
+
+        <!-- 1. Hero Banner lớn ảnh đại diện điểm đến -->
+        <div class="detail-banner shadow-sm">
+            <img th:src="${chuyenXe.hinhAnhHienThi}"
+                 th:alt="${chuyenXe.tuyenXe.diemDen}"
+                 onerror="this.onerror=null; this.src='/images/destinations/default.jpg';">
+            <div class="detail-banner-overlay">
+                <div class="container-fluid p-0">
+                    <span class="badge bg-warning text-dark fs-6 mb-2">
+                        <i class="bi bi-geo-alt-fill me-1"></i><span th:text="${chuyenXe.tuyenXe.diemDen}">Điểm đến</span>
+                    </span>
+                    <h1 class="display-6 fw-bold mb-2" th:text="${chuyenXe.tuyenXe.tenTuyen}">Sài Gòn - Đà Lạt</h1>
+                    <p class="lead mb-0 text-white-50">
+                        <i class="bi bi-clock-history me-1"></i>Hành trình dự kiến: <strong class="text-white" th:text="${chuyenXe.tuyenXe.thoiGianDuKien}">7 giờ</strong>
+                        • Quãng đường: <strong class="text-white" th:text="${chuyenXe.tuyenXe.quangDuongKm + ' km'}">305 km</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Cột trái: Thông tin chuyến đi, xe, tiện ích & thư viện ảnh -->
+            <div class="col-lg-8">
+                <!-- Thẻ thông tin hành trình & lịch trình -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <h5 class="fw-bold text-primary mb-3">
+                        <i class="bi bi-info-circle-fill me-2"></i>Thông Tin Lịch Trình & Xe Phục Vụ
+                    </h5>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <div class="small text-muted mb-1"><i class="bi bi-geo-alt text-danger me-1"></i>Điểm xuất phát:</div>
+                                <h6 class="fw-bold mb-2 text-dark" th:text="${chuyenXe.tuyenXe.diemDi}">TP. Hồ Chí Minh</h6>
+                                <div class="small text-muted mb-1"><i class="bi bi-clock text-primary me-1"></i>Giờ xuất bến:</div>
+                                <div class="fs-5 fw-bold text-primary" th:text="${chuyenXe.gioKhoiHanh}">08:00</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <div class="small text-muted mb-1"><i class="bi bi-flag-fill text-success me-1"></i>Điểm đến:</div>
+                                <h6 class="fw-bold mb-2 text-dark" th:text="${chuyenXe.tuyenXe.diemDen}">Đà Lạt</h6>
+                                <div class="small text-muted mb-1"><i class="bi bi-clock-fill text-secondary me-1"></i>Giờ đến dự kiến:</div>
+                                <div class="fs-5 fw-bold text-secondary" th:text="${chuyenXe.gioDenDuKien}">15:00</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3 h-100">
+                                <div class="small text-muted mb-1">Phương tiện vận chuyển:</div>
+                                <h6 class="fw-bold mb-1" th:text="${chuyenXe.xe.tenXe + ' (' + chuyenXe.xe.bienSo + ')'}">Thaco Mobihome</h6>
+                                <span class="badge" th:classappend="${chuyenXe.xe.loaiXe == 'Limousine' ? 'bg-warning text-dark' : 'bg-primary'}"
+                                      th:text="${chuyenXe.xe.loaiXe}">Giường nằm</span>
+                                <span class="badge bg-secondary-subtle text-secondary" th:text="${chuyenXe.xe.tongSoGhe + ' ghế'}">34 ghế</span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3 h-100">
+                                <div class="small text-muted mb-1">Ngày khởi hành:</div>
+                                <h6 class="fw-bold mb-1 text-dark" th:text="${#temporals.format(chuyenXe.ngayKhoiHanh, 'EEEE, dd/MM/yyyy')}">01/11/2026</h6>
+                                <div class="small text-muted">
+                                    Tình trạng ghế:
+                                    <strong class="text-success" th:if="${chuyenXe.soGheTrong != null and chuyenXe.soGheTrong > 0}"
+                                            th:text="${'Còn ' + chuyenXe.soGheTrong + ' ghế trống'}">Còn 20 ghế trống</strong>
+                                    <strong class="text-danger" th:if="${chuyenXe.soGheTrong != null and chuyenXe.soGheTrong == 0}">Hết chỗ</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Giới thiệu điểm đến -->
+                    <div class="mt-4 p-3 bg-primary-subtle text-primary rounded-3">
+                        <h6 class="fw-bold mb-1"><i class="bi bi-geo-fill me-1"></i>Khám phá điểm đến: <span th:text="${chuyenXe.tuyenXe.diemDen}"></span></h6>
+                        <p class="small mb-0 text-dark" th:text="${highlightText}">Thông tin danh lam thắng cảnh đặc sắc.</p>
+                    </div>
+                </div>
+
+                <!-- Thư viện hình ảnh điểm đến (Gallery) -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4" th:if="${galleryImages != null and !#lists.isEmpty(galleryImages)}">
+                    <h5 class="fw-bold text-dark mb-3">
+                        <i class="bi bi-images text-warning me-2"></i>Hình Ảnh Khám Phá Địa Điểm
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-md-4" th:each="img : ${galleryImages}">
+                            <div class="rounded-3 overflow-hidden shadow-sm" style="height: 160px;">
+                                <img th:src="${img}" class="w-100 h-100" style="object-fit: cover;"
+                                     onerror="this.onerror=null; this.src='/images/destinations/default.jpg';">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tiện ích dịch vụ -->
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-stars text-primary me-2"></i>Tiện Ích & Dịch Vụ Đi Kèm</h5>
+                    <div class="row g-3">
+                        <div class="col-6 col-md-3 text-center p-2">
+                            <i class="bi bi-wifi fs-2 text-primary d-block mb-1"></i>
+                            <span class="small fw-semibold">Wifi miễn phí</span>
+                        </div>
+                        <div class="col-6 col-md-3 text-center p-2">
+                            <i class="bi bi-cup-straw fs-2 text-success d-block mb-1"></i>
+                            <span class="small fw-semibold">Nước & Khăn lạnh</span>
+                        </div>
+                        <div class="col-6 col-md-3 text-center p-2">
+                            <i class="bi bi-battery-charging fs-2 text-warning d-block mb-1"></i>
+                            <span class="small fw-semibold">Cổng sạc USB</span>
+                        </div>
+                        <div class="col-6 col-md-3 text-center p-2">
+                            <i class="bi bi-shield-check fs-2 text-danger d-block mb-1"></i>
+                            <span class="small fw-semibold">Bảo hiểm 100%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Card đặt vé sticky -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-lg rounded-4 p-4 sticky-top" style="top: 80px;">
+                    <div class="small text-muted">Giá vé niêm yết</div>
+                    <div class="fs-2 fw-bold text-danger mb-3"
+                         th:text="${#numbers.formatDecimal(chuyenXe.giaVe, 0, 'COMMA', 0, 'POINT') + 'đ'}">280,000đ</div>
+
+                    <div class="p-3 bg-light rounded-3 mb-4 small">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Mã chuyến:</span>
+                            <strong th:text="${chuyenXe.maChuyen}">CX01</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Chỗ trống hiện có:</span>
+                            <strong class="text-success" th:text="${(chuyenXe.soGheTrong != null ? chuyenXe.soGheTrong : 20) + ' chỗ'}">20 chỗ</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Trạng thái:</span>
+                            <span class="badge bg-success" th:text="${chuyenXe.trangThai}">Sắp khởi hành</span>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a th:href="@{/chuyen-xe/chon-ghe/{id}(id=${chuyenXe.id})}"
+                           class="btn btn-primary btn-lg fw-bold shadow-sm rounded-pill py-3"
+                           th:classappend="${chuyenXe.soGheTrong != null and chuyenXe.soGheTrong == 0 ? 'disabled' : ''}">
+                            <i class="bi bi-ticket-perforated-fill me-1"></i> CHỌN SỐ VÉ & GHẾ NGỒI <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                        <a th:href="@{/chuyen-xe/tim-kiem}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Tìm chuyến khác
+                        </a>
+                    </div>
+
+                    <div class="text-center mt-3 small text-muted">
+                        <i class="bi bi-shield-lock-fill text-success me-1"></i>Hệ thống bảo vệ giữ chỗ theo thời gian thực.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
