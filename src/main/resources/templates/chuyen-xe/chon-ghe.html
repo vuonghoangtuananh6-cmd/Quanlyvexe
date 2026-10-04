@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Đặt Vé & Chọn Chỗ Ngồi - Bus Seat Booking UI</title>
+</head>
+<body>
+    <div th:fragment="content" class="container py-4">
+        <!-- Breadcrumb điều hướng -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/}">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/chuyen-xe/tim-kiem}">Tìm chuyến xe</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Chọn ghế & Đặt vé</li>
+            </ol>
+        </nav>
+
+        <!-- THANH TIẾN TRÌNH STEPPER (3 BƯỚC ĐẶT VÉ CHUẨN) -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+            <div class="booking-stepper">
+                <div class="stepper-step active" id="stepIndicator1">
+                    <div class="step-icon-circle">1</div>
+                    <span class="step-label">1. Chọn số lượng vé</span>
+                </div>
+                <div class="stepper-step" id="stepIndicator2">
+                    <div class="step-icon-circle">2</div>
+                    <span class="step-label">2. Chọn vị trí ghế</span>
+                </div>
+                <div class="stepper-step" id="stepIndicator3">
+                    <div class="step-icon-circle">3</div>
+                    <span class="step-label">3. Xác nhận đặt vé</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- CỘT BÊN TRÁI: NỘI DUNG CÁC BƯỚC (PANEL WIZARD) -->
+            <div class="col-lg-7">
+                <!-- ================= BƯỚC 1: CHỌN SỐ LƯỢNG VÉ ================= -->
+                <div id="stepPanel1" class="card border-0 shadow-sm rounded-4 p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="fw-bold mb-0 text-primary">
+                            <i class="bi bi-1-circle-fill me-2"></i>Bước 1: Chọn Số Lượng Vé
+                        </h4>
+                        <span class="badge bg-primary-subtle text-primary fs-6 px-3 py-2 rounded-pill fw-bold" th:text="${chuyenXe.xe.loaiXe}">Giường nằm</span>
+                    </div>
+                    <p class="text-muted small mb-4">Lựa chọn số lượng vé bạn muốn đặt cho hành trình này trước khi chọn vị trí ghế.</p>
+
+                    <!-- Thẻ tóm tắt chuyến đi kèm ảnh điểm đến -->
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-light">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                                <img th:src="${chuyenXe.hinhAnhHienThi}"
+                                     th:alt="${chuyenXe.tuyenXe.diemDen}"
+                                     class="w-100 h-100" style="object-fit: cover; min-height: 150px;"
+                                     onerror="this.onerror=null; this.src='/images/destinations/default.jpg';">
+                            </div>
+                            <div class="col-md-8 p-3 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                        <h5 class="fw-bold text-dark mb-0" th:text="${chuyenXe.tuyenXe.tenTuyen}">Sài Gòn - Đà Lạt</h5>
+                                        <span class="badge bg-warning text-dark fw-bold" th:text="${chuyenXe.xe.tenXe}">Thaco Mobihome</span>
+                                    </div>
+                                    <p class="text-muted small mb-2">
+                                        <i class="bi bi-calendar-event me-1 text-primary"></i>Khởi hành: 
+                                        <strong class="text-dark" th:text="${chuyenXe.gioKhoiHanh + ' - ' + #temporals.format(chuyenXe.ngayKhoiHanh, 'dd/MM/yyyy')}">08:00 - 01/11/2026</strong>
+                                    </p>
+                                    <p class="text-muted small mb-0">
+                                        <i class="bi bi-clock-history me-1 text-secondary"></i>Thời gian dự kiến: 
+                                        <span th:text="${chuyenXe.tuyenXe.thoiGianDuKien}">7 giờ</span>
+                                    </p>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center pt-2 mt-2 border-top">
+                                    <div>
+                                        <span class="small text-muted">Đơn giá 1 vé: </span>
+                                        <strong class="text-danger fs-5" id="unitPriceDisplay"
+                                              th:text="${#numbers.formatDecimal(chuyenXe.giaVe, 0, 'COMMA', 0, 'POINT') + 'đ'}">280,000đ</strong>
+                                    </div>
+                                    <span class="badge bg-success py-2 px-3 rounded-pill" id="availableSeatsDisplay"
+                                          th:text="${(chuyenXe.soGheTrong != null ? chuyenXe.soGheTrong : 20) + ' chỗ còn trống'}">20 chỗ còn trống</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Khu vực bộ chọn số lượng vé -->
+                    <div class="ticket-counter-box mb-4">
+                        <label class="form-label fw-bold text-dark fs-5 mb-2 d-block">
+                            <i class="bi bi-people-fill me-2 text-primary"></i>Số lượng hành khách đặt vé
+                        </label>
+                        <p class="text-muted small mb-3">Bạn cần chọn đúng số ghế tương ứng với số lượng vé ở Bước 2.</p>
+
+                        <div class="d-flex justify-content-center align-items-center gap-3">
+                            <button type="button" class="btn-counter" id="btnDecreaseQty" onclick="changeQuantity(-1)" title="Giảm số vé">
+                                <i class="bi bi-dash-lg"></i>
+                            </button>
+                            <input type="number" id="ticketQuantity" class="counter-input shadow-sm"
+                                   value="1" min="1" th:max="${chuyenXe.soGheTrong != null ? chuyenXe.soGheTrong : 20}"
+                                   onchange="validateQuantityInput(this)">
+                            <button type="button" class="btn-counter" id="btnIncreaseQty" onclick="changeQuantity(1)" title="Tăng số vé">
+                                <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </div>
+
+                        <div class="text-muted small mt-3">
+                            Số lượng tối đa có thể đặt: <strong class="text-primary fs-6" id="maxSeatsText"
+                                                                th:text="${chuyenXe.soGheTrong != null ? chuyenXe.soGheTrong : 20}">20</strong> vé
+                        </div>
+
+                        <!-- Cảnh báo nếu chuyến đi hết chỗ -->
+                        <div th:if="${chuyenXe.soGheTrong != null and chuyenXe.soGheTrong == 0}" class="alert alert-danger mt-3 mb-0">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>Chuyến xe này hiện đã hết chỗ. Vui lòng quay lại tìm chuyến khác!
+                        </div>
+                    </div>
+
+                    <!-- Tóm tắt số tiền dự kiến bước 1 -->
+                    <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3 mb-4 border">
+                        <span class="fw-semibold text-muted">Tạm tính bước 1 (Đơn giá × Số vé):</span>
+                        <span class="fs-4 fw-bold text-danger" id="step1EstimatedTotal">280,000đ</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a th:href="@{/chuyen-xe/tim-kiem}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Quay lại tìm chuyến
+                        </a>
+                        <button type="button" class="btn btn-primary btn-lg fw-bold px-4 shadow-sm" id="btnNextToStep2" onclick="goToStep(2)"
+                                th:disabled="${chuyenXe.soGheTrong != null and chuyenXe.soGheTrong == 0}">
+                            Tiếp tục: Chọn ghế <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ================= BƯỚC 2: CHỌN SƠ ĐỒ GHẾ (TRỌNG TÂM UI) ================= -->
+                <div id="stepPanel2" class="card border-0 shadow-sm rounded-4 p-4" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h4 class="fw-bold mb-1 text-primary">
+                                <i class="bi bi-2-circle-fill me-2"></i>Bước 2: Chọn Vị Trí Ghế
+                            </h4>
+                            <p class="text-muted small mb-0">Vui lòng chọn đúng <strong class="text-primary fw-bold fs-6" id="targetSeatCountLabel">1</strong> ghế theo số lượng vé đã đặt.</p>
+                        </div>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="goToStep(1)">
+                            <i class="bi bi-arrow-left me-1"></i>Đổi số lượng vé
+                        </button>
+                    </div>
+
+                    <!-- Thanh thông báo trạng thái & tiến độ chọn ghế theo yêu cầu prompt -->
+                    <div class="alert alert-primary py-2 px-3 rounded-3 mb-3 d-flex justify-content-between align-items-center" id="seatStatusAlert">
+                        <div>
+                            <i class="bi bi-info-circle-fill text-primary me-2"></i>
+                            <span id="seatProgressStatusText">Số vé: <strong>1</strong> | Ghế đã chọn: <em>Chưa chọn</em> | <strong>Bạn cần chọn 1 ghế.</strong></span>
+                        </div>
+                        <div id="selectedSeatsBadges" class="d-flex flex-wrap gap-1">
+                            <span class="badge bg-secondary">Chưa chọn ghế</span>
+                        </div>
+                    </div>
+
+                    <!-- Bảng chú thích màu sắc trạng thái ghế chuẩn Bus Seat Booking UI -->
+                    <div class="seat-legend-box mb-4">
+                        <div class="seat-legend-item">
+                            <span class="seat-legend-sample empty"></span>
+                            <span>Ghế trống</span>
+                        </div>
+                        <div class="seat-legend-item">
+                            <span class="seat-legend-sample selected"></span>
+                            <span>Đang chọn</span>
+                        </div>
+                        <div class="seat-legend-item">
+                            <span class="seat-legend-sample booked"></span>
+                            <span>Đã bán</span>
+                        </div>
+                    </div>
+
+                    <!-- Tabs chọn tầng nếu là xe 2 tầng -->
+                    <ul class="nav nav-pills nav-fill mb-4 bg-light p-1 rounded-3" id="floorTabNav" th:if="${coTang2 != false}">
+                        <li class="nav-item">
+                            <button class="nav-link active fw-bold py-2" id="tabBtnFloor1" type="button" onclick="switchFloor(1)">
+                                <i class="bi bi-layers me-1"></i>TẦNG DƯỚI (Tầng 1)
+                                <span class="badge bg-primary ms-1" id="floor1BadgeCount">0</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link fw-bold py-2" id="tabBtnFloor2" type="button" onclick="switchFloor(2)">
+                                <i class="bi bi-layers-fill me-1"></i>TẦNG TRÊN (Tầng 2)
+                                <span class="badge bg-secondary ms-1" id="floor2BadgeCount">0</span>
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- KHU VỰC SƠ ĐỒ KHOANG XE (BUS CABIN FRAME) -->
+                    <div class="bus-cabin-frame mb-4" id="busCabinContainer">
+                        <!-- Đầu xe / Phía tài xế & Vô lăng -->
+                        <div class="bus-windshield">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="driver-wheel" title="Vị trí tài xế lái xe">
+                                    <i class="bi bi-vinyl-fill"></i>
+                                </div>
+                                <span class="small fw-bold text-muted">VÔ LĂNG TÀI XẾ</span>
+                            </div>
+                            <div class="bus-entry-door">
+                                <i class="bi bi-door-open-fill text-success me-1"></i>CỬA LÊN XE
+                            </div>
+                        </div>
+
+                        <!-- Khoang ghế Tầng 1 -->
+                        <div id="floor1Cabin">
+                            <div class="text-center small fw-bold text-primary mb-2" id="floor1Title">
+                                <i class="bi bi-layers me-1"></i>KHOANG GHẾ TẦNG DƯỚI (DÃY A)
+                            </div>
+                            <div class="d-flex flex-wrap justify-content-center gap-2" id="floor1Seats">
+                                <th:block th:each="g : ${danhSachGhe}" th:if="${g.tang == 1}">
+                                    <div th:if="${danhSachGheDaDat != null and #lists.contains(danhSachGheDaDat, g.soGhe)}"
+                                         class="bus-seat seat-booked" title="Ghế đã được đặt">
+                                        <span th:text="${g.soGhe}">A01</span>
+                                    </div>
+                                    <div th:unless="${danhSachGheDaDat != null and #lists.contains(danhSachGheDaDat, g.soGhe)}"
+                                         class="bus-seat seat-empty seat-selectable"
+                                         th:attr="data-seat=${g.soGhe}" onclick="toggleSeat(this)">
+                                        <span th:text="${g.soGhe}">A01</span>
+                                    </div>
+                                </th:block>
+                            </div>
+                        </div>
+
+                        <!-- Khoang ghế Tầng 2 (Ẩn/Hiện linh hoạt) -->
+                        <div id="floor2Cabin" style="display: none;">
+                            <div class="text-center small fw-bold text-success mb-2">
+                                <i class="bi bi-layers-fill me-1"></i>KHOANG GHẾ TẦNG TRÊN (DÃY B)
+                            </div>
+                            <div class="d-flex flex-wrap justify-content-center gap-2" id="floor2Seats">
+                                <th:block th:each="g : ${danhSachGhe}" th:if="${g.tang == 2}">
+                                    <div th:if="${danhSachGheDaDat != null and #lists.contains(danhSachGheDaDat, g.soGhe)}"
+                                         class="bus-seat seat-booked" title="Ghế đã được đặt">
+                                        <span th:text="${g.soGhe}">B01</span>
+                                    </div>
+                                    <div th:unless="${danhSachGheDaDat != null and #lists.contains(danhSachGheDaDat, g.soGhe)}"
+                                         class="bus-seat seat-empty seat-selectable"
+                                         th:attr="data-seat=${g.soGhe}" onclick="toggleSeat(this)">
+                                        <span th:text="${g.soGhe}">B01</span>
+                                    </div>
+                                </th:block>
+                            </div>
+                        </div>
+
+                        <!-- Lối đi ở giữa / Đuôi xe -->
+                        <div class="bus-aisle-lane mt-3">
+                            <i class="bi bi-arrow-down-up me-1"></i> LỐI ĐI GIỮA KHOANG XE
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Điều hướng bước 2 -->
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button type="button" class="btn btn-outline-secondary" onclick="goToStep(1)">
+                            <i class="bi bi-arrow-left me-1"></i> Quay lại Bước 1
+                        </button>
+                        <button type="button" class="btn btn-primary btn-lg fw-bold px-4 shadow-sm" id="btnNextToStep3" onclick="goToStep(3)" disabled>
+                            Tiếp tục: Xác nhận <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ================= BƯỚC 3: XÁC NHẬN THÔNG TIN & ĐẶT VÉ ================= -->
+                <div id="stepPanel3" class="card border-0 shadow-sm rounded-4 p-4" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="fw-bold mb-0 text-primary">
+                            <i class="bi bi-3-circle-fill me-2"></i>Bước 3: Xác Nhận Thông Tin Đặt Vé
+                        </h4>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="goToStep(2)">
+                            <i class="bi bi-arrow-left me-1"></i>Chọn lại ghế
+                        </button>
+                    </div>
+
+                    <p class="text-muted small mb-4">Vui lòng kiểm tra lại thông tin vé xe và nhập thông tin người liên hệ trước khi xác nhận giữ chỗ.</p>
+
+                    <!-- Form gửi lên server -->
+                    <form th:action="@{/ve/dat-ve}" method="post" id="finalBookingForm">
+                        <input type="hidden" name="chuyenXeId" th:value="${chuyenXe.id}">
+                        <input type="hidden" name="soLuongVe" id="hiddenSoLuongVe" value="1">
+                        <input type="hidden" name="soGhe" id="hiddenSoGhe" required>
+
+                        <!-- Thông tin tóm tắt đặt vé -->
+                        <div class="bg-light p-3 rounded-4 mb-4 border">
+                            <div class="row g-2 small">
+                                <div class="col-6 text-muted">Hành trình tuyến xe:</div>
+                                <div class="col-6 text-end fw-bold text-dark" th:text="${chuyenXe.tuyenXe.tenTuyen}">Sài Gòn - Đà Lạt</div>
+
+                                <div class="col-6 text-muted">Ngày & Giờ khởi hành:</div>
+                                <div class="col-6 text-end fw-bold text-primary" th:text="${chuyenXe.gioKhoiHanh + ' - ' + #temporals.format(chuyenXe.ngayKhoiHanh, 'dd/MM/yyyy')}"></div>
+
+                                <div class="col-6 text-muted">Số lượng vé:</div>
+                                <div class="col-6 text-end fw-bold text-dark" id="summaryQtyDisplay">1 vé</div>
+
+                                <div class="col-6 text-muted">Vị trí ghế đã chọn:</div>
+                                <div class="col-6 text-end"><span class="badge bg-primary text-white fs-6" id="summarySeatsDisplay">Chưa có</span></div>
+
+                                <div class="col-6 text-muted">Đơn giá 1 vé:</div>
+                                <div class="col-6 text-end fw-bold text-dark" th:text="${#numbers.formatDecimal(chuyenXe.giaVe, 0, 'COMMA', 0, 'POINT') + 'đ'}">280,000đ</div>
+
+                                <div class="col-12"><hr class="my-2"></div>
+
+                                <div class="col-6 fs-6 fw-bold text-dark">Tổng tiền thanh toán:</div>
+                                <div class="col-6 text-end fs-4 fw-bold text-danger" id="summaryTotalDisplay">280,000đ</div>
+                            </div>
+                        </div>
+
+                        <!-- Thông tin tài khoản đã đăng nhập -->
+                        <div class="alert alert-success py-2 px-3 small rounded-3 mb-3 d-flex align-items-center justify-content-between" th:if="${session.user != null}">
+                            <div>
+                                <i class="bi bi-person-check-fill text-success me-2 fs-6"></i>
+                                Đang đặt vé với tài khoản: <strong th:text="${session.user.hoTen}">Nguyễn Văn An</strong>
+                            </div>
+                            <span class="badge bg-success" th:text="${session.user.taiKhoan}">khach01</span>
+                        </div>
+
+                        <!-- Form thông tin khách hàng -->
+                        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-person-lines-fill text-primary me-2"></i>Thông Tin Hành Khách</h6>
+
+                        <div class="mb-3">
+                            <label for="tenKhachHang" class="form-label fw-semibold small">Họ và tên hành khách <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="tenKhachHang" name="tenKhachHang"
+                                   th:value="${datVeDto.tenKhachHang}" required placeholder="VD: Nguyễn Văn An">
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label for="soDienThoai" class="form-label fw-semibold small">Số điện thoại liên hệ <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" id="soDienThoai" name="soDienThoai"
+                                       th:value="${datVeDto.soDienThoai}" required placeholder="VD: 0987654321">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label fw-semibold small">Email nhận vé điện tử</label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                       th:value="${datVeDto.email}" placeholder="VD: email@gmail.com">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="ghiChu" class="form-label fw-semibold small">Ghi chú đón xe / Dặn dò tài xế</label>
+                            <textarea class="form-control" id="ghiChu" name="ghiChu" rows="2"
+                                      placeholder="VD: Đón tại Bến xe Miền Đông mới, có mang hành lý cồng kềnh..."></textarea>
+                        </div>
+
+                        <!-- Nút hành động xác nhận -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button type="button" class="btn btn-outline-secondary" onclick="goToStep(2)">
+                                <i class="bi bi-arrow-left me-1"></i> Quay lại chọn ghế
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm px-4" id="btnFinalSubmit">
+                                <i class="bi bi-shield-check me-1"></i> XÁC NHẬN ĐẶT VÉ
+                            </button>
+                        </div>
+
+                        <div class="small text-muted text-center mt-3">
+                            <i class="bi bi-lock-fill text-success me-1"></i>Giao dịch được bảo vệ bằng cơ chế khóa ghế đồng thời thời gian thực.
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- CỘT BÊN PHẢI: TỔNG QUAN ĐƠN ĐẶT VÉ STICKY (BUS SEAT BOOKING SUMMARY) -->
+            <div class="col-lg-5">
+                <div class="booking-summary-card sticky-top" style="top: 80px;">
+                    <div class="d-flex align-items-center mb-3">
+                        <img th:src="${chuyenXe.hinhAnhHienThi}"
+                             th:alt="${chuyenXe.tuyenXe.diemDen}"
+                             class="rounded-3 me-3" style="width: 80px; height: 80px; object-fit: cover;"
+                             onerror="this.onerror=null; this.src='/images/destinations/default.jpg';">
+                        <div>
+                            <span class="badge bg-primary-subtle text-primary fw-bold small mb-1" th:text="${chuyenXe.xe.loaiXe}">Giường nằm</span>
+                            <h6 class="fw-bold mb-0 text-dark" th:text="${chuyenXe.tuyenXe.tenTuyen}">Sài Gòn - Đà Lạt</h6>
+                            <small class="text-muted" th:text="${chuyenXe.xe.tenXe + ' • ' + chuyenXe.xe.bienSo}"></small>
+                        </div>
+                    </div>
+
+                    <!-- Lộ trình timeline -->
+                    <div class="bg-light p-3 rounded-4 mb-3 small border">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted"><i class="bi bi-geo-alt-fill text-danger me-1"></i>Điểm đi:</span>
+                            <strong th:text="${chuyenXe.tuyenXe.diemDi}">TP. Hồ Chí Minh</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted"><i class="bi bi-flag-fill text-success me-1"></i>Điểm đến:</span>
+                            <strong th:text="${chuyenXe.tuyenXe.diemDen}">Đà Lạt</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted"><i class="bi bi-calendar-event me-1 text-primary"></i>Ngày đi:</span>
+                            <strong th:text="${#temporals.format(chuyenXe.ngayKhoiHanh, 'dd/MM/yyyy')}"></strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted"><i class="bi bi-clock me-1 text-secondary"></i>Giờ xuất phát:</span>
+                            <strong class="text-primary" th:text="${chuyenXe.gioKhoiHanh}"></strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted"><i class="bi bi-clock-history me-1 text-muted"></i>Đến dự kiến:</span>
+                            <strong th:text="${chuyenXe.gioDenDuKien}"></strong>
+                        </div>
+                        <hr class="my-2">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-muted">Số lượng vé chọn:</span>
+                            <strong class="text-primary fs-6" id="stickyQty">1 vé</strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-muted">Vị trí ghế đã chọn:</span>
+                            <span id="stickySeats" class="badge bg-secondary">Chưa chọn</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-muted">Đơn giá mỗi vé:</span>
+                            <strong class="text-dark" th:text="${#numbers.formatDecimal(chuyenXe.giaVe, 0, 'COMMA', 0, 'POINT') + 'đ'}">280,000đ</strong>
+                        </div>
+                        <hr class="my-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold text-dark fs-6">Tổng tạm tính:</span>
+                            <span class="fw-bold text-danger fs-3" id="stickyTotalPrice">280,000đ</span>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-primary-subtle text-primary rounded-3 small">
+                        <i class="bi bi-shield-check me-1 fs-6"></i>
+                        <strong>Cam kết dịch vụ:</strong> Giữ đúng vị trí ghế ngồi trực quan, không bắt khách dọc đường, hoàn tiền 100% nếu sự cố nhà xe.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- JAVASCRIPT ĐIỀU KHIỂN QUY TRÌNH 3 BƯỚC VÀ CHỌN GHẾ THEO SỐ LƯỢNG -->
+        <script th:inline="javascript">
+            /* Dữ liệu chuyến xe từ Server */
+            var unitPrice = /*[[${chuyenXe.giaVe}]]*/ 280000;
+            var maxAvailableSeats = /*[[${chuyenXe.soGheTrong != null ? chuyenXe.soGheTrong : 20}]]*/ 20;
+            var totalBusSeats = /*[[${chuyenXe.xe != null and chuyenXe.xe.tongSoGhe != null ? chuyenXe.xe.tongSoGhe : 34}]]*/ 34;
+            var busTypeName = /*[[${chuyenXe.xe != null and chuyenXe.xe.loaiXe != null ? chuyenXe.xe.loaiXe : 'Giường nằm'}]]*/ 'Giường nằm';
+            var bookedSeatsList = /*[[${danhSachGheDaDat != null ? danhSachGheDaDat : {}}]]*/ [];
+            var isCoTang2 = /*[[${coTang2 != null ? coTang2 : false}]]*/ false;
+
+            var currentStep = 1;
+            var ticketQty = 1;
+            var selectedSeats = [];
+            var activeFloor = 1;
+
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
+            }
+
+            /* Chuyển đổi giữa Tầng 1 và Tầng 2 */
+            function switchFloor(floor) {
+                activeFloor = floor;
+                var f1 = document.getElementById('floor1Cabin');
+                var f2 = document.getElementById('floor2Cabin');
+                var tab1 = document.getElementById('tabBtnFloor1');
+                var tab2 = document.getElementById('tabBtnFloor2');
+
+                if (floor === 1) {
+                    if (f1) f1.style.display = 'block';
+                    if (f2) f2.style.display = 'none';
+                    if (tab1) tab1.classList.add('active');
+                    if (tab2) tab2.classList.remove('active');
+                } else {
+                    if (f1) f1.style.display = 'none';
+                    if (f2) f2.style.display = 'block';
+                    if (tab1) tab1.classList.remove('active');
+                    if (tab2) tab2.classList.add('active');
+                }
+            }
+
+            /* Cơ chế tự động bù đắp sơ đồ ghế phía client nếu server trả về danh sách rỗng */
+            function ensureSeatsRendered() {
+                var selectable = document.querySelectorAll('#stepPanel2 .bus-seat.seat-selectable, #stepPanel2 .bus-seat.seat-booked');
+                if (selectable.length > 0) {
+                    return; // Đã có ghế được render từ Server qua Thymeleaf
+                }
+
+                console.warn("Chưa có danh sách ghế từ máy chủ, kích hoạt tự động sinh ghế trên giao diện...");
+                var total = (typeof totalBusSeats !== 'undefined' && totalBusSeats > 0) ? totalBusSeats : 34;
+                var typeStr = (typeof busTypeName !== 'undefined' && busTypeName ? busTypeName : '').toLowerCase();
+                var isSingleFloor = typeStr.includes('ngoi') || typeStr.includes('ngồi');
+                var booked = Array.isArray(bookedSeatsList) ? bookedSeatsList : [];
+
+                var f1 = document.getElementById('floor1Seats');
+                var f2 = document.getElementById('floor2Seats');
+                var tabNav = document.getElementById('floorTabNav');
+                var f1Title = document.getElementById('floor1Title');
+
+                if (!f1) return;
+
+                if (isSingleFloor) {
+                    if (tabNav) tabNav.style.display = 'none';
+                    if (f1Title) f1Title.innerHTML = '<i class="bi bi-layers me-1"></i>SƠ ĐỒ KHOANG GHẾ NGỒI (1 TẦNG)';
+                    var html = '';
+                    for (var i = 1; i <= total; i++) {
+                        var sName = (i < 10 ? '0' : '') + i;
+                        var isBooked = booked.indexOf(sName) !== -1;
+                        if (isBooked) {
+                            html += '<div class="bus-seat seat-booked" title="Ghế đã được đặt"><span>' + sName + '</span></div>';
+                        } else {
+                            html += '<div class="bus-seat seat-empty seat-selectable" data-seat="' + sName + '" onclick="toggleSeat(this)"><span>' + sName + '</span></div>';
+                        }
+                    }
+                    f1.innerHTML = html;
+                } else {
+                    if (tabNav) tabNav.style.display = 'flex';
+                    if (f1Title) f1Title.innerHTML = '<i class="bi bi-layers me-1"></i>KHOANG GHẾ TẦNG DƯỚI (DÃY A)';
+                    var perFloor = Math.floor(total / 2);
+                    var f1Html = '';
+                    for (var i = 1; i <= perFloor; i++) {
+                        var sName1 = 'A' + (i < 10 ? '0' : '') + i;
+                        var isBooked1 = booked.indexOf(sName1) !== -1;
+                        if (isBooked1) {
+                            f1Html += '<div class="bus-seat seat-booked" title="Ghế đã được đặt"><span>' + sName1 + '</span></div>';
+                        } else {
+                            f1Html += '<div class="bus-seat seat-empty seat-selectable" data-seat="' + sName1 + '" onclick="toggleSeat(this)"><span>' + sName1 + '</span></div>';
+                        }
+                    }
+                    f1.innerHTML = f1Html;
+
+                    if (f2) {
+                        var f2Html = '';
+                        var f2Count = total - perFloor;
+                        for (var j = 1; j <= f2Count; j++) {
+                            var sName2 = 'B' + (j < 10 ? '0' : '') + j;
+                            var isBooked2 = booked.indexOf(sName2) !== -1;
+                            if (isBooked2) {
+                                f2Html += '<div class="bus-seat seat-booked" title="Ghế đã được đặt"><span>' + sName2 + '</span></div>';
+                            } else {
+                                f2Html += '<div class="bus-seat seat-empty seat-selectable" data-seat="' + sName2 + '" onclick="toggleSeat(this)"><span>' + sName2 + '</span></div>';
+                            }
+                        }
+                        f2.innerHTML = f2Html;
+                    }
+                }
+            }
+
+            /* 1. Điều khiển số lượng vé (Bước 1) */
+            function changeQuantity(delta) {
+                var newQty = ticketQty + delta;
+                if (newQty >= 1 && newQty <= maxAvailableSeats) {
+                    ticketQty = newQty;
+                    updateQuantityUI();
+                }
+            }
+
+            function validateQuantityInput(input) {
+                var val = parseInt(input.value);
+                if (isNaN(val) || val < 1) val = 1;
+                if (val > maxAvailableSeats) val = maxAvailableSeats;
+                ticketQty = val;
+                updateQuantityUI();
+            }
+
+            function updateQuantityUI() {
+                document.getElementById('ticketQuantity').value = ticketQty;
+                document.getElementById('btnDecreaseQty').disabled = (ticketQty <= 1);
+                document.getElementById('btnIncreaseQty').disabled = (ticketQty >= maxAvailableSeats);
+
+                var total = unitPrice * ticketQty;
+                var totalFormatted = formatCurrency(total);
+
+                document.getElementById('step1EstimatedTotal').innerText = totalFormatted;
+                document.getElementById('stickyQty').innerText = ticketQty + ' vé';
+                document.getElementById('stickyTotalPrice').innerText = totalFormatted;
+                document.getElementById('summaryQtyDisplay').innerText = ticketQty + ' vé';
+                document.getElementById('summaryTotalDisplay').innerText = totalFormatted;
+                document.getElementById('hiddenSoLuongVe').value = ticketQty;
+
+                document.getElementById('targetSeatCountLabel').innerText = ticketQty;
+
+                // Nếu số ghế đã chọn đang nhiều hơn số vé mới, tự động cắt bớt ghế thừa
+                if (selectedSeats.length > ticketQty) {
+                    while (selectedSeats.length > ticketQty) {
+                        var removedSeat = selectedSeats.pop();
+                        var el = document.querySelector('.seat-selectable[data-seat="' + removedSeat + '"]');
+                        if (el) {
+                            el.classList.remove('seat-selected');
+                            el.classList.add('seat-empty');
+                        }
+                    }
+                }
+                updateSeatSelectionUI();
+            }
+
+            /* 2. Điều khiển chọn ghế (Bước 2) */
+            function toggleSeat(element) {
+                var seatName = element.getAttribute('data-seat');
+                var index = selectedSeats.indexOf(seatName);
+
+                if (index > -1) {
+                    // Đang chọn -> Bỏ chọn
+                    selectedSeats.splice(index, 1);
+                    element.classList.remove('seat-selected');
+                    element.classList.add('seat-empty');
+                } else {
+                    // Chưa chọn -> Thêm chọn
+                    if (selectedSeats.length < ticketQty) {
+                        selectedSeats.push(seatName);
+                        element.classList.remove('seat-empty');
+                        element.classList.add('seat-selected');
+                    } else if (ticketQty === 1) {
+                        // Nếu đặt 1 vé, click ghế khác sẽ đổi sang ghế mới
+                        selectedSeats.forEach(function(s) {
+                            var oldEl = document.querySelector('.seat-selectable[data-seat="' + s + '"]');
+                            if (oldEl) {
+                                oldEl.classList.remove('seat-selected');
+                                oldEl.classList.add('seat-empty');
+                            }
+                        });
+                        selectedSeats = [seatName];
+                        element.classList.remove('seat-empty');
+                        element.classList.add('seat-selected');
+                    } else {
+                        alert('Bạn đã chọn đủ ' + ticketQty + ' ghế theo số vé. Nếu muốn đổi ghế khác, hãy bấm bỏ chọn bớt một ghế đã chọn!');
+                    }
+                }
+
+                updateSeatSelectionUI();
+            }
+
+            function updateSeatSelectionUI() {
+                var count = selectedSeats.length;
+
+                // Cập nhật số ghế chọn trên từng tầng cho Tab badge
+                var countFloor1 = 0;
+                var countFloor2 = 0;
+                selectedSeats.forEach(function(s) {
+                    if (s.startsWith('B')) countFloor2++;
+                    else countFloor1++;
+                });
+                var b1 = document.getElementById('floor1BadgeCount');
+                var b2 = document.getElementById('floor2BadgeCount');
+                if (b1) b1.innerText = countFloor1;
+                if (b2) b2.innerText = countFloor2;
+
+                var badgesContainer = document.getElementById('selectedSeatsBadges');
+                var stickySeats = document.getElementById('stickySeats');
+                var summarySeatsDisplay = document.getElementById('summarySeatsDisplay');
+                var hiddenSoGhe = document.getElementById('hiddenSoGhe');
+                var btnNextToStep3 = document.getElementById('btnNextToStep3');
+                var seatStatusAlert = document.getElementById('seatStatusAlert');
+                var statusText = document.getElementById('seatProgressStatusText');
+
+                if (count === 0) {
+                    badgesContainer.innerHTML = '<span class="badge bg-secondary">Chưa chọn ghế</span>';
+                    stickySeats.className = 'badge bg-secondary';
+                    stickySeats.innerText = 'Chưa chọn';
+                    summarySeatsDisplay.className = 'badge bg-secondary fs-6';
+                    summarySeatsDisplay.innerText = 'Chưa chọn';
+                    hiddenSoGhe.value = '';
+                    btnNextToStep3.disabled = true;
+
+                    if (seatStatusAlert) seatStatusAlert.className = 'alert alert-primary py-2 px-3 rounded-3 mb-3 d-flex justify-content-between align-items-center';
+                    if (statusText) statusText.innerHTML = 'Số vé: <strong>' + ticketQty + '</strong> | Ghế đã chọn: <em>Chưa chọn</em> | <strong class="text-danger">Bạn cần chọn ' + ticketQty + ' ghế.</strong>';
+                } else {
+                    var html = '';
+                    selectedSeats.forEach(function(s) {
+                        html += '<span class="badge bg-primary text-white fw-bold px-2 py-1">' + s + '</span> ';
+                    });
+                    badgesContainer.innerHTML = html;
+
+                    var seatsString = selectedSeats.join(', ');
+                    stickySeats.className = 'badge bg-primary text-white fw-bold';
+                    stickySeats.innerText = seatsString;
+                    summarySeatsDisplay.className = 'badge bg-primary text-white fs-6';
+                    summarySeatsDisplay.innerText = seatsString;
+                    hiddenSoGhe.value = seatsString;
+
+                    if (count === ticketQty) {
+                        // Đã chọn đủ số ghế bằng số vé
+                        btnNextToStep3.disabled = false;
+                        btnNextToStep3.innerHTML = 'Tiếp tục: Xác nhận (' + count + ' ghế) <i class="bi bi-arrow-right ms-1"></i>';
+                        if (seatStatusAlert) seatStatusAlert.className = 'alert alert-success py-2 px-3 rounded-3 mb-3 d-flex justify-content-between align-items-center';
+                        if (statusText) statusText.innerHTML = '<i class="bi bi-check-circle-fill text-success me-1"></i> <strong>Bạn đã chọn đủ ' + count + '/' + ticketQty + ' ghế:</strong> ' + seatsString;
+                    } else {
+                        // Còn thiếu ghế
+                        btnNextToStep3.disabled = true;
+                        var remaining = ticketQty - count;
+                        btnNextToStep3.innerHTML = 'Vui lòng chọn thêm ' + remaining + ' ghế';
+                        if (seatStatusAlert) seatStatusAlert.className = 'alert alert-warning py-2 px-3 rounded-3 mb-3 d-flex justify-content-between align-items-center';
+                        if (statusText) statusText.innerHTML = 'Số vé: <strong>' + ticketQty + '</strong> | Ghế đã chọn: <strong>' + seatsString + '</strong> | <strong class="text-danger">Bạn cần chọn thêm ' + remaining + ' ghế.</strong>';
+                    }
+                }
+            }
+
+            /* 3. Chuyển bước trong quy trình Wizard */
+            function goToStep(step) {
+                if (step === 2) {
+                    if (maxAvailableSeats === 0) {
+                        alert('Chuyến xe này đã hết chỗ!');
+                        return;
+                    }
+                    ensureSeatsRendered();
+                }
+                if (step === 3 && selectedSeats.length !== ticketQty) {
+                    alert('Vui lòng chọn đủ ' + ticketQty + ' ghế trước khi tiếp tục!');
+                    return;
+                }
+
+                currentStep = step;
+
+                // Ẩn/hiện Panels
+                document.getElementById('stepPanel1').style.display = (step === 1 ? 'block' : 'none');
+                document.getElementById('stepPanel2').style.display = (step === 2 ? 'block' : 'none');
+                document.getElementById('stepPanel3').style.display = (step === 3 ? 'block' : 'none');
+
+                // Cập nhật Stepper indicators
+                for (var i = 1; i <= 3; i++) {
+                    var el = document.getElementById('stepIndicator' + i);
+                    el.classList.remove('active', 'completed');
+                    if (i < step) {
+                        el.classList.add('completed');
+                    } else if (i === step) {
+                        el.classList.add('active');
+                    }
+                }
+
+                // Cuộn trang nhẹ lên đầu vùng wizard
+                window.scrollTo({ top: 120, behavior: 'smooth' });
+            }
+
+            // Khởi tạo ban đầu
+            document.addEventListener('DOMContentLoaded', function() {
+                updateQuantityUI();
+                ensureSeatsRendered();
+            });
+        </script>
+    </div>
+</body>
+</html>
