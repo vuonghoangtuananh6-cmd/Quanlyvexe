@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Quản lý Vé Xe - Admin</title>
+</head>
+<body>
+    <div th:fragment="content" class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1"><i class="bi bi-ticket-perforated-fill text-primary me-2"></i>Quản Lý Đơn Đặt Vé</h3>
+                <p class="text-muted mb-0">Theo dõi, duyệt thanh toán và quản lý trạng thái vé xe của hành khách</p>
+            </div>
+        </div>
+
+        <!-- Thanh Tìm kiếm và Lọc Vé xe (Tiêu chí 3.4) -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-3">
+                <form th:action="@{/admin/ve-xe}" method="get" class="row g-2 align-items-center">
+                    <div class="col-md-9">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control" name="keyword" th:value="${keyword}"
+                                   placeholder="Tìm kiếm theo mã vé, họ tên hành khách hoặc số điện thoại...">
+                        </div>
+                    </div>
+                    <div class="col-md-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary w-100 fw-semibold">Tìm kiếm</button>
+                        <a th:href="@{/admin/ve-xe}" class="btn btn-outline-secondary">Đặt lại</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>
+                                <a th:href="@{/admin/ve-xe(page=${currentPage}, keyword=${keyword}, sortField='maVe', sortDir=${sortField == 'maVe' ? reverseSortDir : 'asc'})}" class="text-decoration-none text-dark">
+                                    Mã vé <i class="bi bi-arrow-down-up small"></i>
+                                </a>
+                            </th>
+                            <th>
+                                <a th:href="@{/admin/ve-xe(page=${currentPage}, keyword=${keyword}, sortField='tenKhachHang', sortDir=${sortField == 'tenKhachHang' ? reverseSortDir : 'asc'})}" class="text-decoration-none text-dark">
+                                    Hành khách <i class="bi bi-arrow-down-up small"></i>
+                                </a>
+                            </th>
+                            <th>Chuyến xe</th>
+                            <th>
+                                <a th:href="@{/admin/ve-xe(page=${currentPage}, keyword=${keyword}, sortField='soGhe', sortDir=${sortField == 'soGhe' ? reverseSortDir : 'asc'})}" class="text-decoration-none text-dark">
+                                    Số ghế <i class="bi bi-arrow-down-up small"></i>
+                                </a>
+                            </th>
+                            <th>
+                                <a th:href="@{/admin/ve-xe(page=${currentPage}, keyword=${keyword}, sortField='giaVe', sortDir=${sortField == 'giaVe' ? reverseSortDir : 'asc'})}" class="text-decoration-none text-dark">
+                                    Giá vé <i class="bi bi-arrow-down-up small"></i>
+                                </a>
+                            </th>
+                            <th>
+                                <a th:href="@{/admin/ve-xe(page=${currentPage}, keyword=${keyword}, sortField='thoiGianDat', sortDir=${sortField == 'thoiGianDat' ? reverseSortDir : 'asc'})}" class="text-decoration-none text-dark">
+                                    Thời gian đặt <i class="bi bi-arrow-down-up small"></i>
+                                </a>
+                            </th>
+                            <th>
+                                <a th:href="@{/admin/ve-xe(page=${currentPage}, keyword=${keyword}, sortField='trangThaiThanhToan', sortDir=${sortField == 'trangThaiThanhToan' ? reverseSortDir : 'asc'})}" class="text-decoration-none text-dark">
+                                    Trạng thái <i class="bi bi-arrow-down-up small"></i>
+                                </a>
+                            </th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(listVeXe)}">
+                            <td colspan="8" class="text-center text-muted py-4">Chưa có đơn đặt vé nào.</td>
+                        </tr>
+                        <tr th:each="v : ${listVeXe}">
+                            <td><strong class="text-primary" th:text="${v.maVe}">VE123456</strong></td>
+                            <td>
+                                <strong th:text="${v.tenKhachHang}">Nguyễn Văn An</strong><br>
+                                <small class="text-muted" th:text="${v.soDienThoai}"></small>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary-subtle text-secondary" th:text="${v.chuyenXe.maChuyen}">CX01</span>
+                                <small class="d-block text-dark fw-semibold" th:text="${v.chuyenXe.tuyenXe.tenTuyen}">Sài Gòn - Đà Lạt</small>
+                            </td>
+                            <td><span class="badge bg-warning text-dark fw-bold fs-6" th:text="${v.soGhe}">A01</span></td>
+                            <td><strong class="text-danger" th:text="${#numbers.formatDecimal(v.giaVe, 0, 'COMMA', 0, 'POINT') + 'đ'}">280,000đ</strong></td>
+                            <td class="small" th:text="${#temporals.format(v.thoiGianDat, 'dd/MM/yyyy HH:mm')}">15/10/2026 08:30</td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${v.trangThaiThanhToan == 'Đã thanh toán' ? 'bg-success' : (v.trangThaiThanhToan == 'Chờ thanh toán' ? 'bg-warning text-dark' : (v.trangThaiThanhToan == 'Đã lên xe' ? 'bg-info' : 'bg-danger'))}"
+                                      th:text="${v.trangThaiThanhToan}">Chờ thanh toán</span>
+                            </td>
+                            <td class="text-center">
+                                <a th:if="${v.trangThaiThanhToan == 'Chờ thanh toán'}"
+                                   th:href="@{/admin/ve-xe/thanh-toan/{id}(id=${v.id})}" class="btn btn-sm btn-success" title="Xác nhận thanh toán">
+                                    <i class="bi bi-check-lg"></i> Duyệt tiền
+                                </a>
+                                <span th:if="${v.trangThaiThanhToan != 'Chờ thanh toán'}" class="text-muted small">Đã xử lý</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Phân trang -->
+            <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3" th:if="${totalPages > 1}">
+                <span class="small text-muted">Trang <strong th:text="${currentPage}"></strong> / <strong th:text="${totalPages}"></strong> (Tổng <strong th:text="${totalItems}"></strong> vé)</span>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/ve-xe(page=${currentPage - 1}, keyword=${keyword}, sortField=${sortField}, sortDir=${sortDir})}">Trước</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}" th:classappend="${currentPage == i} ? 'active'">
+                            <a class="page-link" th:href="@{/admin/ve-xe(page=${i}, keyword=${keyword}, sortField=${sortField}, sortDir=${sortDir})}" th:text="${i}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/ve-xe(page=${currentPage + 1}, keyword=${keyword}, sortField=${sortField}, sortDir=${sortDir})}">Sau</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
