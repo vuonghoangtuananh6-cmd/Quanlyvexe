@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/main :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Thông báo lỗi - Quản Lý Vé Xe Khách</title>
+</head>
+<body>
+    <div th:fragment="content" class="container py-5 text-center">
+        <div class="row justify-content-center">
+            <div class="col-md-7">
+                <div class="card border-0 shadow-lg p-5 rounded-4">
+                    <div class="mb-4">
+                        <i class="bi bi-exclamation-octagon text-danger" style="font-size: 5rem;"></i>
+                    </div>
+                    <h2 class="fw-bold mb-2 text-danger" th:text="${errorCode != null ? 'Mã lỗi: ' + errorCode : 'Rất tiếc!'}">Mã lỗi</h2>
+                    <p class="fs-5 text-secondary mb-4" th:text="${errorMessage != null ? errorMessage : 'Đã có sự cố bất ngờ xảy ra trong quá trình xử lý.'}">
+                        Mô tả lỗi
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a th:href="@{/}" class="btn btn-primary px-4 py-2">
+                            <i class="bi bi-house-door me-2"></i>Về trang chủ
+                        </a>
+                        <button onclick="history.back()" class="btn btn-outline-secondary px-4 py-2">
+                            <i class="bi bi-arrow-left me-2"></i>Quay lại trang trước
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
