@@ -48,46 +48,129 @@
                             </div>
                         </div>
 
-                        <div class="bg-light p-3 rounded-3 mb-3 small">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="text-muted">Số ghế:</span>
-                                <strong class="text-primary fs-6" th:text="${v.soGhe}">A05</strong>
+                        <!-- Chi tiết vé và Khung Mã QR Code soát vé -->
+                        <div class="row g-3 align-items-center mb-3">
+                            <div class="col-sm-8">
+                                <div class="bg-light p-3 rounded-3 small h-100">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="text-muted">Vị trí ghế:</span>
+                                        <strong class="text-primary fs-6" th:text="${v.soGhe}">A05</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="text-muted">Biển số xe:</span>
+                                        <span class="fw-semibold" th:text="${v.chuyenXe.xe.bienSo}">51B-123.45</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="text-muted">Hành khách:</span>
+                                        <span class="fw-semibold text-dark" th:text="${v.tenKhachHang}"></span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="text-muted">Điện thoại:</span>
+                                        <span th:text="${v.soDienThoai}"></span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mt-2 border-top pt-2">
+                                        <span class="text-muted">Giá vé:</span>
+                                        <strong class="text-danger fs-5" th:text="${#numbers.formatDecimal(v.giaVe, 0, 'COMMA', 0, 'POINT') + 'đ'}">280,000đ</strong>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="text-muted">Biển số xe:</span>
-                                <span th:text="${v.chuyenXe.xe.bienSo}">51B-123.45</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="text-muted">Hành khách:</span>
-                                <span th:text="${v.tenKhachHang + ' (' + v.soDienThoai + ')'}"></span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mt-2 border-top pt-2">
-                                <span class="text-muted">Tổng tiền:</span>
-                                <strong class="text-danger fs-5" th:text="${#numbers.formatDecimal(v.giaVe, 0, 'COMMA', 0, 'POINT') + 'đ'}">280,000đ</strong>
+                            <div class="col-sm-4 text-center">
+                                <div class="p-2 border rounded-3 bg-white shadow-xs">
+                                    <img th:src="'https://api.qrserver.com/v1/create-qr-code/?size=115x115&margin=2&data=' + ${v.maVe}"
+                                         alt="Mã QR Soát Vé"
+                                         class="img-fluid rounded-2 mb-1" style="width: 105px; height: 105px;">
+                                    <div class="badge bg-primary-subtle text-primary border d-block" style="font-size: 0.68rem;">Mã QR soát vé</div>
+                                    <div class="text-muted small fw-bold font-monospace mt-1" style="font-size: 0.72rem;" th:text="${v.maVe}">VE123</div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Nút hủy vé nếu chưa lên xe và chưa hủy -->
-                        <div class="text-end" th:if="${v.trangThaiThanhToan != 'Đã hủy' and v.trangThaiThanhToan != 'Đã lên xe'}">
-                            <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" th:data-bs-target="'#cancelModal' + ${v.id}">
-                                <i class="bi bi-x-circle me-1"></i> Hủy vé này
+                        <!-- Khu vực nút bấm: Xem & In vé và Hủy vé -->
+                        <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" th:data-bs-target="'#printModal' + ${v.id}">
+                                <i class="bi bi-ticket-detailed me-1"></i> Xem & In Vé
                             </button>
 
-                            <!-- Modal xác nhận hủy vé (Tiêu chí 3.3) -->
-                            <div class="modal fade" th:id="'cancelModal' + ${v.id}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận hủy vé</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <div th:if="${v.trangThaiThanhToan != 'Đã hủy' and v.trangThaiThanhToan != 'Đã lên xe'}">
+                                <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" th:data-bs-target="'#cancelModal' + ${v.id}">
+                                    <i class="bi bi-x-circle me-1"></i> Hủy vé
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- MODAL 1: XÁC NHẬN HỦY VÉ (TIÊU CHÍ 3.3) -->
+                        <div class="modal fade" th:id="'cancelModal' + ${v.id}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận hủy vé</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body text-start">
+                                        Bạn có chắc chắn muốn hủy vé <strong th:text="${v.maVe}"></strong> (Ghế <strong th:text="${v.soGhe}"></strong>)? Ghế này sẽ được giải phóng ngay lập tức cho người khác đặt.
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                        <a th:href="@{/ve/huy/{id}(id=${v.id})}" class="btn btn-danger">Xác nhận hủy</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- MODAL 2: VÉ ĐIỆN TỬ VÀ IN VÉ CHUYÊN NGHIỆP -->
+                        <div class="modal fade" th:id="'printModal' + ${v.id}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                                    <div class="modal-header bg-primary text-white border-0 py-3">
+                                        <h5 class="modal-title fw-bold">
+                                            <i class="bi bi-bus-front-fill me-2"></i>VÉ XE ĐIỆN TỬ (BOARDING PASS)
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body p-4 bg-light" th:id="'printableTicket' + ${v.id}">
+                                        <div class="card border border-2 border-primary rounded-4 p-3 bg-white shadow-sm">
+                                            <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                                                <div>
+                                                    <h5 class="fw-bold text-primary mb-0" th:text="${v.chuyenXe.tuyenXe.tenTuyen}">Sài Gòn - Đà Lạt</h5>
+                                                    <small class="text-muted" th:text="${'Mã chuyến: ' + v.chuyenXe.maChuyen + ' | Biển số: ' + v.chuyenXe.xe.bienSo}"></small>
+                                                </div>
+                                                <span class="badge bg-success fs-6" th:text="${v.trangThaiThanhToan}">Đã thanh toán</span>
+                                            </div>
+
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-7">
+                                                    <div class="small text-muted">Hành khách:</div>
+                                                    <div class="fw-bold text-dark fs-6" th:text="${v.tenKhachHang}">Nguyễn Văn A</div>
+                                                    <div class="small text-muted mt-2">Số điện thoại:</div>
+                                                    <div class="fw-semibold text-dark" th:text="${v.soDienThoai}">0901234567</div>
+                                                    <div class="small text-muted mt-2">Giờ xuất bến:</div>
+                                                    <div class="fw-bold text-primary" th:text="${v.chuyenXe.gioKhoiHanh + ' - ' + #temporals.format(v.chuyenXe.ngayKhoiHanh, 'dd/MM/yyyy')}"></div>
+                                                </div>
+                                                <div class="col-5 text-center d-flex flex-column align-items-center justify-content-center">
+                                                    <img th:src="'https://api.qrserver.com/v1/create-qr-code/?size=130x130&margin=2&data=' + ${v.maVe}"
+                                                         alt="Mã QR Vé" class="img-fluid rounded-3 border p-1 shadow-xs mb-1" style="max-width: 120px;">
+                                                    <span class="badge bg-light text-dark border font-monospace" th:text="${v.maVe}">VE123456</span>
+                                                    <div class="small text-muted" style="font-size: 0.7rem;">Quét soát vé tại cửa xe</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="bg-light p-3 rounded-3 d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <span class="small text-muted d-block">Vị trí ghế ngồi:</span>
+                                                    <span class="fs-4 fw-bold text-primary" th:text="${v.soGhe}">A05</span>
+                                                </div>
+                                                <div class="text-end">
+                                                    <span class="small text-muted d-block">Giá vé:</span>
+                                                    <span class="fs-5 fw-bold text-danger" th:text="${#numbers.formatDecimal(v.giaVe, 0, 'COMMA', 0, 'POINT') + 'đ'}">280,000đ</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="modal-body text-start">
-                                            Bạn có chắc chắn muốn hủy vé <strong th:text="${v.maVe}"></strong> (Ghế <strong th:text="${v.soGhe}"></strong>)? Ghế này sẽ được giải phóng cho người khác đặt.
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                                            <a th:href="@{/ve/huy/{id}(id=${v.id})}" class="btn btn-danger">Xác nhận hủy</a>
-                                        </div>
+                                    </div>
+                                    <div class="modal-footer bg-light border-0 py-3">
+                                        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Đóng</button>
+                                        <button type="button" class="btn btn-primary px-4 fw-bold" onclick="window.print()">
+                                            <i class="bi bi-printer-fill me-1"></i> In Vé Này
+                                        </button>
                                     </div>
                                 </div>
                             </div>
