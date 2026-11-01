@@ -54,6 +54,9 @@ public class TuyenXeController {
             return "redirect:/admin/tuyen-xe";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            if (tuyenXe.getId() != null) {
+                return "redirect:/admin/tuyen-xe/chinh-sua/" + tuyenXe.getId();
+            }
             return "redirect:/admin/tuyen-xe/them-moi";
         }
     }

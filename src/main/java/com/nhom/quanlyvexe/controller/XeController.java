@@ -53,6 +53,9 @@ public class XeController {
             return "redirect:/admin/xe";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            if (xe.getId() != null) {
+                return "redirect:/admin/xe/chinh-sua/" + xe.getId();
+            }
             return "redirect:/admin/xe/them-moi";
         }
     }

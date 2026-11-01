@@ -50,7 +50,12 @@ public class AuthController {
             session.setAttribute("user", user);
             redirectAttributes.addFlashAttribute("successMessage", "Xin chào " + user.getHoTen() + "! Đăng nhập thành công.");
 
-            if ("ROLE_ADMIN".equals(user.getVaiTro()) || "ROLE_STAFF".equals(user.getVaiTro())) {
+            if ("ROLE_STAFF".equals(user.getVaiTro())) {
+                session.removeAttribute("redirectUrl");
+                return "redirect:/admin/ve-xe";
+            }
+
+            if ("ROLE_ADMIN".equals(user.getVaiTro())) {
                 session.removeAttribute("redirectUrl");
                 return "redirect:/admin/tuyen-xe";
             }

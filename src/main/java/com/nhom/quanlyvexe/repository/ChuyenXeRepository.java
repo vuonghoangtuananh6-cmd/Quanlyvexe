@@ -34,8 +34,11 @@ public interface ChuyenXeRepository extends JpaRepository<ChuyenXe, Long> {
     boolean existsByXeId(Long xeId);
     boolean existsByTuyenXeId(Long tuyenXeId);
 
-    // Kiểm tra xe có bị trùng lịch trong ngày không
+    // Kiểm tra xe có bị trùng lịch trong ngày không (hỗ trợ cả tạo mới và chỉnh sửa)
     boolean existsByXeIdAndNgayKhoiHanhAndTrangThaiNot(Long xeId, LocalDate ngayKhoiHanh, String trangThai);
+
+    @Query("SELECT COUNT(c) > 0 FROM ChuyenXe c WHERE c.xe.id = :xeId AND c.ngayKhoiHanh = :ngay AND c.trangThai != 'Đã hủy' AND (:id IS NULL OR c.id != :id)")
+    boolean existsConflictXe(@Param("xeId") Long xeId, @Param("ngay") LocalDate ngay, @Param("id") Long id);
 
     // Tìm kiếm chuyến xe cho Admin có phân trang và sắp xếp (Tiêu chí 3.4)
     @Query("SELECT c FROM ChuyenXe c WHERE " +

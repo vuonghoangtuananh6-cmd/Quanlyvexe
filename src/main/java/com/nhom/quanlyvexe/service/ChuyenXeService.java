@@ -60,10 +60,11 @@ public class ChuyenXeService {
             throw new IllegalArgumentException("Mã chuyến xe '" + chuyenXe.getMaChuyen() + "' đã tồn tại!");
         }
 
-        // Kiểm tra logic trùng xe trong cùng một ngày xuất bến
-        if (isNew && chuyenXeRepository.existsByXeIdAndNgayKhoiHanhAndTrangThaiNot(
-                chuyenXe.getXe().getId(), chuyenXe.getNgayKhoiHanh(), "Đã hủy")) {
-            throw new IllegalArgumentException("Xe này đã được xếp lịch chạy trong ngày " + chuyenXe.getNgayKhoiHanh() + "!");
+        // Kiểm tra logic trùng xe trong cùng một ngày xuất bến (chống trùng xe cả khi thêm mới và chỉnh sửa)
+        if (chuyenXe.getXe() != null && chuyenXe.getXe().getId() != null && chuyenXe.getNgayKhoiHanh() != null) {
+            if (chuyenXeRepository.existsConflictXe(chuyenXe.getXe().getId(), chuyenXe.getNgayKhoiHanh(), chuyenXe.getId())) {
+                throw new IllegalArgumentException("Xe này đã được xếp lịch chạy cho chuyến khác trong ngày " + chuyenXe.getNgayKhoiHanh() + "!");
+            }
         }
 
         return chuyenXeRepository.save(chuyenXe);

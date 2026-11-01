@@ -22,7 +22,7 @@ public class AdminAuthInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        String uri = request.getRequestURI();
+        String uri = request.getServletPath();
         String role = user.getVaiTro();
 
         // Nhân viên (ROLE_STAFF) chỉ có quyền quản lý vé xe (/admin/ve-xe)

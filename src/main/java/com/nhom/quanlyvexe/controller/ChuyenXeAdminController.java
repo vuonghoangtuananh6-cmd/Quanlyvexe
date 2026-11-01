@@ -63,6 +63,9 @@ public class ChuyenXeAdminController {
             return "redirect:/admin/chuyen-xe";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            if (chuyenXe.getId() != null) {
+                return "redirect:/admin/chuyen-xe/chinh-sua/" + chuyenXe.getId();
+            }
             return "redirect:/admin/chuyen-xe/them-moi";
         }
     }

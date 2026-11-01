@@ -22,7 +22,7 @@ public class DatVeDto {
     private String tenKhachHang;
 
     @NotBlank(message = "Số điện thoại không được để trống")
-    @Pattern(regexp = "^(0|\\+84)[3|5|7|8|9][0-9]{8}$", message = "Số điện thoại không đúng định dạng Việt Nam")
+    @Pattern(regexp = "^(0|\\+84)[35789][0-9]{8}$", message = "Số điện thoại không đúng định dạng Việt Nam")
     private String soDienThoai;
 
     @Email(message = "Địa chỉ email không đúng định dạng")
